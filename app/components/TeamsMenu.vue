@@ -1,52 +1,36 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
 
-defineProps<{
-  collapsed?: boolean
-}>()
+defineProps<{ collapsed?: boolean }>()
 
-const teams = ref([{
-  label: 'Nuxt',
-  avatar: {
-    src: 'https://github.com/nuxt.png',
-    alt: 'Nuxt'
+const teams = [
+  {
+    label: 'Don Andres',
+    avatar: { src: '/img/donandres.webp', alt: 'Don Andres' }
+  },
+  {
+    label: 'Flowid',
+    avatar: { src: '/img/LogoFlows.png', alt: 'flows' },
+    url: 'https://flowsma.com/donandres/#/workspace'
   }
-}, {
-  label: 'NuxtHub',
-  avatar: {
-    src: 'https://github.com/nuxt-hub.png',
-    alt: 'NuxtHub'
-  }
-}, {
-  label: 'NuxtLabs',
-  avatar: {
-    src: 'https://github.com/nuxtlabs.png',
-    alt: 'NuxtLabs'
-  }
-}])
-const selectedTeam = ref(teams.value[0])
+]
 
-const items = computed<DropdownMenuItem[][]>(() => {
-  return [teams.value.map(team => ({
+const selectedTeam = useState('selectedTeam', () => teams[0])
+
+const items = computed<DropdownMenuItem[][]>(() => [
+  teams.map((team) => ({
     ...team,
     onSelect() {
       selectedTeam.value = team
     }
-  })), [{
-    label: 'Create team',
-    icon: 'i-lucide-circle-plus'
-  }, {
-    label: 'Manage teams',
-    icon: 'i-lucide-cog'
-  }]]
-})
+  }))
+])
 </script>
 
 <template>
   <UDropdownMenu
     :items="items"
     :content="{ align: 'center', collisionPadding: 12 }"
-    :ui="{ content: collapsed ? 'w-40' : 'w-(--reka-dropdown-menu-trigger-width)' }"
   >
     <UButton
       v-bind="{
@@ -60,9 +44,7 @@ const items = computed<DropdownMenuItem[][]>(() => {
       :square="collapsed"
       class="data-[state=open]:bg-elevated"
       :class="[!collapsed && 'py-2']"
-      :ui="{
-        trailingIcon: 'text-dimmed'
-      }"
+      :ui="{ trailingIcon: 'text-dimmed' }"
     />
   </UDropdownMenu>
 </template>
