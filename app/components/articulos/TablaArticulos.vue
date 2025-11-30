@@ -5,51 +5,94 @@ const worker = new Worker('/workers/exporter.js')
 const articulosStore = useArticulosStore()
 const toast = useToast()
 
+const fileInput = ref<HTMLInputElement | null>(null)
+const modalOpen = ref(false)
+
 const loading = ref(false)
+import { useImportArticulos } from '@/composables/useImportArticulos'
+
+const {
+  progress,
+  totalprocess,
+  error,
+  finished,
+  resultsOk,
+  resultsError,
+  startImport
+} = useImportArticulos()
+
 const downloadMenu = ref(false)
-const filterMenu = ref(false)
 const table = useTemplateRef<any>('table')
-
-const selectedFilterColumn = ref<string | null>(null)
-
 const pagination = ref({
   pageIndex: 0,
-  pageSize: 15
+  pageSize: 20
 })
 
-// Helpers para filtros
-const availableColumns = computed(() => {
-  return articulosStore.showableColumns.map((col) => ({
-    label:
-      col
-        .split('.')
-        .pop()
-        ?.replace(/^\w/, (c) => c.toUpperCase()) || col,
-    value: col
-  }))
-})
+const selectFile = () => {
+  fileInput.value?.click()
+}
 
-const availableValues = computed(() => {
-  if (!selectedFilterColumn.value || !articulosStore.uniqueColumnValues)
-    return []
-  return articulosStore.uniqueColumnValues[selectedFilterColumn.value] || []
-})
+const handleFile = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
 
-const activeFilters = computed(() => {
-  if (!articulosStore.columnFilters) return []
-  return Object.entries(articulosStore.columnFilters).filter(
-    ([_, vals]) => vals.length > 0
-  )
-})
+  if (!file) return
 
-const removeFilter = (col: string, val: string) => {
-  articulosStore.columnFilters[col] = articulosStore.columnFilters[col].filter(
-    (v) => v !== val
-  )
-  if (articulosStore.columnFilters[col].length === 0) {
-    delete articulosStore.columnFilters[col]
+  modalOpen.value = true
+
+  try {
+    await startImport(file)
+
+    console.log('progress', progress.value)
+    console.log('totalprocess', totalprocess.value)
+    console.log('error', error.value)
+    console.log('finished', finished.value)
+    console.log('resultsOk', resultsOk.value)
+    console.log('resultsError', resultsError.value)
+  } catch (err) {
+    console.error('Error importando:', err)
+  } finally {
+    // limpia el input para permitir subir el mismo archivo de nuevo
+    target.value = ''
   }
 }
+
+// const filterMenu = ref(false)
+// const selectedFilterColumn = ref<string | null>(null)
+
+// Helpers para filtros
+// const availableColumns = computed(() => {
+//   return articulosStore.showableColumns.map((col) => ({
+//     label:
+//       col
+//         .split('.')
+//         .pop()
+//         ?.replace(/^\w/, (c) => c.toUpperCase()) || col,
+//     value: col
+//   }))
+// })
+
+// const availableValues = computed(() => {
+//   if (!selectedFilterColumn.value || !articulosStore.uniqueColumnValues)
+//     return []
+//   return articulosStore.uniqueColumnValues[selectedFilterColumn.value] || []
+// })
+
+// const activeFilters = computed(() => {
+//   if (!articulosStore.columnFilters) return []
+//   return Object.entries(articulosStore.columnFilters).filter(
+//     ([_, vals]) => vals.length > 0
+//   )
+// })
+
+// const removeFilter = (col: string, val: string) => {
+//   articulosStore.columnFilters[col] = articulosStore.columnFilters[col].filter(
+//     (v) => v !== val
+//   )
+//   if (articulosStore.columnFilters[col].length === 0) {
+//     delete articulosStore.columnFilters[col]
+//   }
+// }
 
 worker.onmessage = (event) => {
   if (event.data.type === 'download') {
@@ -79,7 +122,7 @@ const downloadCSV = () => {
   toast.add({ title: 'Generando CSV...', color: 'info' })
   worker.postMessage({
     type: 'csv',
-    data: toRaw(articulosStore.filteredRows)
+    data: toRaw(articulosStore.exportRows)
   })
 }
 const downloadXLSX = () => {
@@ -87,7 +130,7 @@ const downloadXLSX = () => {
   toast.add({ title: 'Generando Excel...', color: 'info' })
   worker.postMessage({
     type: 'xlsx',
-    data: toRaw(articulosStore.filteredRows)
+    data: toRaw(articulosStore.exportRows)
   })
 }
 
@@ -96,7 +139,7 @@ const downloadJSON = () => {
   toast.add({ title: 'Generando JSON...', color: 'info' })
   worker.postMessage({
     type: 'json',
-    data: toRaw(articulosStore.filteredRows)
+    data: toRaw(articulosStore.exportRows)
   })
 }
 
@@ -115,7 +158,6 @@ const totalItems = computed(
 const handlePageChange = (page: number) => {
   table.value?.tableApi?.setPageIndex(page - 1)
 }
-
 onMounted(async () => {
   loading.value = true
   await articulosStore.fetchArticulos()
@@ -124,14 +166,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UInput
-    v-model="articulosStore.search"
-    placeholder="Buscar..."
-    class="mb-4"
-  />
-  <div class="flex gap-2 mb-4 items-center flex-wrap">
+  <div class="flex gap-2 mb-4 items-center justify-between flex-wrap">
+    <UInput v-model="articulosStore.search" placeholder="Buscar..." />
+    <!-- <div class="flex gap-2 mb-4 items-center flex-wrap">
     <UPopover v-model:open="filterMenu" :popper="{ placement: 'bottom-start' }">
-      <UButton icon="i-lucide-filter" color="white" variant="solid" size="xs">
+      <UButton icon="i-lucide-filter" color="neutral" variant="solid">
         Filtros
       </UButton>
 
@@ -159,7 +198,6 @@ onMounted(async () => {
       </template>
     </UPopover>
 
-    <!-- Chips de filtros activos -->
     <template v-for="(filter, index) in activeFilters" :key="index">
       <div v-for="val in filter[1]" :key="val" class="flex items-center">
         <UBadge
@@ -170,7 +208,6 @@ onMounted(async () => {
           {{ filter[0].split('.').pop() }}: {{ val }}
           <UButton
             icon="i-lucide-x"
-            size="2xs"
             color="primary"
             variant="ghost"
             :padded="false"
@@ -179,19 +216,79 @@ onMounted(async () => {
         </UBadge>
       </div>
     </template>
+  </div> -->
+
+    <UButton color="primary" @click="selectFile">Importar archivo</UButton>
+
+    <!-- Input oculto -->
+    <input
+      ref="fileInput"
+      type="file"
+      accept=".csv, .xlsx, .json"
+      class="hidden"
+      @change="handleFile"
+    />
+    <UPopover
+      v-model:open="downloadMenu"
+      class="w-40"
+      :popper="{ placement: 'bottom-end' }"
+      :ui="{ content: 'w-(--reka-popper-anchor-width) cursor-pointer' }"
+    >
+      <UButton
+        class="cursor-pointer justify-center"
+        color="secondary"
+        variant="outline"
+      >
+        Descargar ▼
+      </UButton>
+
+      <template #content>
+        <div class="space-y-1 w-full">
+          <!-- CSV -->
+          <UButton
+            class="cursor-pointer"
+            variant="ghost"
+            block
+            @click="downloadCSV"
+          >
+            <template #leading>
+              <Icon name="mdi:file-delimited-outline" class="w-5 h-5" />
+            </template>
+            CSV
+          </UButton>
+
+          <!-- Excel -->
+          <UButton
+            class="cursor-pointer"
+            variant="ghost"
+            block
+            @click="downloadXLSX"
+          >
+            <template #leading>
+              <Icon
+                name="mdi:file-excel-outline"
+                class="w-5 h-5 text-green-600"
+              />
+            </template>
+            Excel
+          </UButton>
+
+          <!-- JSON -->
+          <UButton
+            class="cursor-pointer"
+            variant="ghost"
+            block
+            @click="downloadJSON"
+          >
+            <template #leading>
+              <Icon name="mdi:code-json" class="w-5 h-5 text-yellow-600" />
+            </template>
+            JSON
+          </UButton>
+        </div>
+      </template>
+    </UPopover>
   </div>
-
-  <UPopover v-model:open="downloadMenu" :popper="{ placement: 'bottom-end' }">
-    <UButton color="secondary" variant="outline" size="xs">Descargar ▼</UButton>
-
-    <template #content>
-      <div class="p-2 space-y-1">
-        <UButton variant="ghost" block @click="downloadCSV">CSV</UButton>
-        <UButton variant="ghost" block @click="downloadXLSX">Excel</UButton>
-        <UButton variant="ghost" block @click="downloadJSON">JSON</UButton>
-      </div>
-    </template>
-  </UPopover>
 
   <UTable
     ref="table"
@@ -200,6 +297,8 @@ onMounted(async () => {
     loading-animation="carousel"
     :data="articulosStore.filteredRows"
     :columns="articulosStore.tableColumns"
+    sticky
+    class="w-full h-full"
     :ui="{
       base: 'table-fixed border-separate border-spacing-0',
       thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
@@ -211,7 +310,7 @@ onMounted(async () => {
       getPaginationRowModel: getPaginationRowModel()
     }"
   />
-  <div class="px-4 py-3.5 text-sm text-muted">
+  <div class="px-2 py-1 text-sm text-muted">
     Mostrando {{ (currentPage - 1) * itemsPerPage + 1 }} -
     {{ Math.min(currentPage * itemsPerPage, totalItems) }} de
     {{ totalItems }} fila(s)
@@ -224,4 +323,52 @@ onMounted(async () => {
       @update:page="handlePageChange"
     />
   </div>
+  <UModal v-model:open="modalOpen">
+    <template #header>
+      <h3 class="text-lg font-semibold">Importando artículos…</h3>
+    </template>
+
+    <template #content>
+      <UCard class="p-6 space-y-4">
+        <UProgress
+          v-if="!finished && totalprocess"
+          :value="(progress / totalprocess) * 100"
+        />
+
+        <p class="text-sm text-gray-600">
+          {{ progress }} / {{ totalprocess }} procesados
+        </p>
+
+        <p v-if="error" class="text-red-600">
+          {{ error }}
+        </p>
+
+        <!-- ✔ Resultados correctos -->
+        <div v-if="finished && resultsOk.length">
+          <h4 class="font-bold text-green-600">Actualizados correctamente</h4>
+          <ul class="pl-4 text-sm text-green-700">
+            <li v-for="r in resultsOk" :key="r.id">
+              ID {{ r.id }} — {{ r.nombre }} (OK)
+            </li>
+          </ul>
+        </div>
+
+        <!-- ❌ Errores -->
+        <div v-if="finished && resultsError.length">
+          <h4 class="font-bold text-red-600">Errores</h4>
+          <ul class="pl-4 text-sm text-red-700">
+            <li v-for="r in resultsError" :key="r.id">
+              ID {{ r.id }} — {{ r.nombre }} — {{ r.msg }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="flex justify-end">
+          <UButton v-if="finished" color="primary" @click="modalOpen = false">
+            Cerrar
+          </UButton>
+        </div>
+      </UCard>
+    </template>
+  </UModal>
 </template>

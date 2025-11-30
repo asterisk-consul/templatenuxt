@@ -3,6 +3,7 @@ import type { TableColumn } from '#ui/types'
 import { h } from 'vue'
 import { UBadge } from '#components'
 import { useExportData } from '@/composables/useExportData'
+import { useImportArticulos } from '@/composables/useImportArticulos'
 
 export const useArticulosStore = defineStore('articulos', () => {
   const rows = ref<RowArticulos[]>([])
@@ -10,6 +11,8 @@ export const useArticulosStore = defineStore('articulos', () => {
   const showableColumns = ref<string[]>([])
   const total = ref(0)
   const { exportCSV, exportExcel, exportJSON } = useExportData()
+  const { startImport, progress, totalprocess, finished, error } =
+    useImportArticulos()
 
   // 🔎 Filtros reactivos
   const search = ref('')
@@ -127,6 +130,22 @@ export const useArticulosStore = defineStore('articulos', () => {
       })
     )
   })
+  const exportRows = computed(() => {
+    return filteredRows.value.map((row) => {
+      const plano: Record<string, any> = {}
+
+      showableColumns.value.forEach((col) => {
+        // Copio solo datos crudos y simples
+        plano[col] = row[col] ?? null
+      })
+
+      return plano
+    })
+  })
+  const importarArchivo = async (file: File) => {
+    await startImport(file)
+    await fetchArticulos() // refresca tabla al terminar
+  }
 
   const exportarCSV = () => exportCSV(filteredRows.value, 'articulos.csv')
   const exportarXLSX = () => exportExcel(filteredRows.value, 'articulos.xlsx')
@@ -146,7 +165,13 @@ export const useArticulosStore = defineStore('articulos', () => {
     fetchArticulos,
     exportarCSV,
     exportarXLSX,
-    exportarJSON
+    exportarJSON,
+    exportRows,
+    importarArchivo,
+    progresoImport: progress,
+    totalImport: totalprocess,
+    importFinished: finished,
+    importError: error
   }
 })
 
