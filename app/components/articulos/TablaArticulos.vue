@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { getPaginationRowModel } from '@tanstack/vue-table'
-
-const worker = new Worker('/workers/exporter.js')
 const articulosStore = useArticulosStore()
+
+const { exportCSV, exportExcel, exportJSON } = useExportData()
 const toast = useToast()
 
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -42,18 +42,61 @@ const handleFile = async (event: Event) => {
 
   try {
     await startImport(file)
-
-    console.log('progress', progress.value)
-    console.log('totalprocess', totalprocess.value)
-    console.log('error', error.value)
-    console.log('finished', finished.value)
-    console.log('resultsOk', resultsOk.value)
-    console.log('resultsError', resultsError.value)
   } catch (err) {
     console.error('Error importando:', err)
   } finally {
     // limpia el input para permitir subir el mismo archivo de nuevo
     target.value = ''
+  }
+}
+const downloadCSV = async () => {
+  const rows = toRaw(articulosStore.exportRows)
+
+  toast.add({ title: 'Generando CSV...', color: 'info' })
+
+  try {
+    await exportCSV(rows, 'articulos.csv')
+    toast.add({ title: 'CSV descargado', color: 'success' })
+  } catch (err) {
+    toast.add({
+      title: 'Error generando CSV',
+      color: 'error',
+      description: String(err)
+    })
+  }
+}
+
+const downloadXLSX = async () => {
+  const rows = toRaw(articulosStore.exportRows)
+
+  toast.add({ title: 'Generando Excel...', color: 'info' })
+
+  try {
+    await exportExcel(rows, 'articulos.xlsx')
+    toast.add({ title: 'Excel descargado', color: 'success' })
+  } catch (err) {
+    toast.add({
+      title: 'Error generando Excel',
+      color: 'error',
+      description: String(err)
+    })
+  }
+}
+
+const downloadJSON = async () => {
+  const rows = toRaw(articulosStore.exportRows)
+
+  toast.add({ title: 'Generando JSON...', color: 'info' })
+
+  try {
+    await exportJSON(rows, 'articulos.json')
+    toast.add({ title: 'JSON descargado', color: 'success' })
+  } catch (err) {
+    toast.add({
+      title: 'Error generando JSON',
+      color: 'error',
+      description: String(err)
+    })
   }
 }
 
@@ -93,55 +136,6 @@ const handleFile = async (event: Event) => {
 //     delete articulosStore.columnFilters[col]
 //   }
 // }
-
-worker.onmessage = (event) => {
-  if (event.data.type === 'download') {
-    const { filename, content, mime } = event.data
-
-    const blob = new Blob([content], { type: mime })
-    const url = URL.createObjectURL(blob)
-
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    a.click()
-
-    URL.revokeObjectURL(url)
-    toast.add({ title: 'Descarga completada', color: 'success' })
-  } else if (event.data.type === 'error') {
-    toast.add({
-      title: 'Error en la descarga',
-      description: event.data.error,
-      color: 'error'
-    })
-  }
-}
-
-const downloadCSV = () => {
-  downloadMenu.value = false // cerrar rápido
-  toast.add({ title: 'Generando CSV...', color: 'info' })
-  worker.postMessage({
-    type: 'csv',
-    data: toRaw(articulosStore.exportRows)
-  })
-}
-const downloadXLSX = () => {
-  downloadMenu.value = false
-  toast.add({ title: 'Generando Excel...', color: 'info' })
-  worker.postMessage({
-    type: 'xlsx',
-    data: toRaw(articulosStore.exportRows)
-  })
-}
-
-const downloadJSON = () => {
-  downloadMenu.value = false
-  toast.add({ title: 'Generando JSON...', color: 'info' })
-  worker.postMessage({
-    type: 'json',
-    data: toRaw(articulosStore.exportRows)
-  })
-}
 
 const currentPage = computed(
   () => (table.value?.tableApi?.getState().pagination.pageIndex ?? 0) + 1

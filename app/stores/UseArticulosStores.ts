@@ -8,7 +8,6 @@ export const useArticulosStore = defineStore('articulos', () => {
   const cols = ref<string[]>([])
   const showableColumns = ref<string[]>([])
   const total = ref(0)
-  const { exportCSV, exportExcel, exportJSON } = useExportData()
 
   // 🔎 Filtros reactivos
   const search = ref('')
@@ -104,13 +103,6 @@ export const useArticulosStore = defineStore('articulos', () => {
       return plano
     })
   })
-  const importarArchivo = async (file: File) => {
-    await fetchArticulos() // refresca tabla al terminar
-  }
-
-  const exportarCSV = () => exportCSV(filteredRows.value, 'articulos.csv')
-  const exportarXLSX = () => exportExcel(filteredRows.value, 'articulos.xlsx')
-  const exportarJSON = () => exportJSON(filteredRows.value, 'articulos.json')
 
   return {
     rows,
@@ -124,11 +116,7 @@ export const useArticulosStore = defineStore('articulos', () => {
     columnFilters,
     uniqueColumnValues,
     fetchArticulos,
-    exportarCSV,
-    exportarXLSX,
-    exportarJSON,
-    exportRows,
-    importarArchivo
+    exportRows
   }
 })
 
