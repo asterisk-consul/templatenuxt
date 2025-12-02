@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { getPaginationRowModel } from '@tanstack/vue-table'
+import { useTablePagination } from '@/composables/useTablePagination'
+
 const articulosStore = useArticulosStore()
 
 const { exportCSV, exportExcel, exportJSON } = useExportData()
+
 const toast = useToast()
 
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -23,10 +26,9 @@ const {
 
 const downloadMenu = ref(false)
 const table = useTemplateRef<any>('table')
-const pagination = ref({
-  pageIndex: 0,
-  pageSize: 20
-})
+
+const { pagination, currentPage, itemsPerPage, totalItems, handlePageChange } =
+  useTablePagination(table, 0, 20)
 
 const selectFile = () => {
   fileInput.value?.click()
@@ -137,21 +139,6 @@ const downloadJSON = async () => {
 //   }
 // }
 
-const currentPage = computed(
-  () => (table.value?.tableApi?.getState().pagination.pageIndex ?? 0) + 1
-)
-
-const itemsPerPage = computed(
-  () => table.value?.tableApi?.getState().pagination.pageSize ?? 10
-)
-
-const totalItems = computed(
-  () => table.value?.tableApi?.getFilteredRowModel().rows.length ?? 0
-)
-
-const handlePageChange = (page: number) => {
-  table.value?.tableApi?.setPageIndex(page - 1)
-}
 onMounted(async () => {
   loading.value = true
   await articulosStore.fetchArticulos()

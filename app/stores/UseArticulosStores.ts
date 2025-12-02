@@ -1,6 +1,4 @@
 // stores/articulos.ts
-import { useExportData } from '@/composables/useExportData'
-import { useImportArticulos } from '@/composables/useImportArticulos'
 import { useTableColumns } from '@/composables/useTableColumns'
 
 export const useArticulosStore = defineStore('articulos', () => {
@@ -119,13 +117,3 @@ export const useArticulosStore = defineStore('articulos', () => {
     exportRows
   }
 })
-
-// Función para convertir "articulos.internalcode" → "Internalcode"
-function normalizarLabel(key: string) {
-  return (
-    key
-      .split('.')
-      .pop()
-      ?.replace(/^\w/, (c) => c.toUpperCase()) || key
-  )
-}
