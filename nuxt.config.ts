@@ -5,7 +5,10 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     ['@pinia/nuxt', { autoImports: ['defineStore', 'storeToRefs'] }] // 👈 así se pasan las opciones
   ],
-
+  devServer: {
+    host: '0.0.0.0', // <- debe estar así
+    port: 3000
+  },
   experimental: {
     watcher: 'chokidar',
     componentIslands: false
