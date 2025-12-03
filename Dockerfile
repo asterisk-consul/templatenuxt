@@ -40,6 +40,7 @@ ENV NODE_ENV=production
 ENV NUXT_HOST=0.0.0.0
 ENV NUXT_PORT=3000
 
+
 # Exponer puerto (Dockloid lo reescribirá con la variable PORT)
 EXPOSE 3000
 
