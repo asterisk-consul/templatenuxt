@@ -5,41 +5,40 @@ WORKDIR /app
 # Instalar pnpm globalmente
 RUN npm install -g pnpm
 
-# Copiar el manifiesto y el lockfile de pnpm
+# Copiar package.json y lockfile
 COPY package.json pnpm-lock.yaml ./
 
-# IMPORTANTE: Instalar TODAS las dependencias (prod + dev) para el build.
+# Instalar todas las dependencias (prod + dev) necesarias para el build
 RUN pnpm install --frozen-lockfile
 
-# Copiar el resto del código fuente del proyecto
+# Copiar el resto del código fuente
 COPY . .
 
-# Construir la aplicación Nuxt (debe generar el .output)
+# Construir la aplicación Nuxt (genera .output)
 RUN pnpm run build
 
 # ---- Etapa de Producción (Production Stage) ----
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Instalar pnpm en el runner antes de usarlo para instalar dependencias de prod.
+# Instalar pnpm en el runner
 RUN npm install -g pnpm
 
-# COPIAR ARCHIVOS ESENCIALES DEL BUILDER:
-# 1. El código compilado
+# Copiar archivos esenciales del builder
 COPY --from=builder /app/.output ./.output
-# 2. package.json (para saber qué instalar)
 COPY --from=builder /app/package.json ./
-# 3. pnpm-lock.yaml (¡EL ARCHIVO FALTANTE! Necesario para --frozen-lockfile)
 COPY --from=builder /app/pnpm-lock.yaml ./
 
-# Instalar solo las dependencias de PRODUCCIÓN.
-# Usamos --frozen-lockfile para mayor seguridad y consistencia.
-RUN pnpm install --prod --frozen-lockfile --ignore-scripts
+# Instalar solo dependencias de producción
+RUN pnpm install --prod --frozen-lockfile
 
-EXPOSE 3000
-
+# Configuración de entorno
 ENV NODE_ENV=production
 ENV NUXT_HOST=0.0.0.0
+ENV NUXT_PORT=3000
 
-# Comando para iniciar el servidor de Nuxt compilado
-CMD ["node", ".output/server/index.mjs"]
+# Exponer el puerto (Dokploy lo reescribirá con la variable PORT)
+EXPOSE 3000
+
+# Comando para iniciar la app respetando el puerto asignado
+CMD ["sh", "-c", "pnpm run start -- -p ${PORT:-3000} -H 0.0.0.0"]
