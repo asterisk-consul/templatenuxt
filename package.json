@@ -6,8 +6,8 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "preview": "nuxt preview",
-    "start": "nuxt preview",
-    "postinstall": "nuxt prepare",
+    "start": "node .output/server/index.mjs",
+    "postinstall": "nuxt prepare || true",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck"
   },
