@@ -1,9 +1,5 @@
 # ---- Etapa de Construcción (Build Stage) ----
-# Usa una imagen base con Node.js y pnpm preinstalado si es posible,
-# o una base limpia y lo instalamos como antes. Usaremos la versión con Node 20.
 FROM node:20-alpine AS builder
-
-# Establece el directorio de trabajo
 WORKDIR /app
 
 # Instalar pnpm globalmente
@@ -12,39 +8,36 @@ RUN npm install -g pnpm
 # Copiar el manifiesto y el lockfile de pnpm
 COPY package.json pnpm-lock.yaml ./
 
-# IMPORTANTE: Instalar TODAS las dependencias (producción y desarrollo)
-# `nuxt build` requiere dependencias de desarrollo.
+# IMPORTANTE: Instalar TODAS las dependencias (prod + dev) para el build.
 RUN pnpm install --frozen-lockfile
 
 # Copiar el resto del código fuente del proyecto
 COPY . .
 
-# Construir la aplicación Nuxt
-# El resultado se almacena en el directorio .output
+# Construir la aplicación Nuxt (debe generar el .output)
 RUN pnpm run build
 
 # ---- Etapa de Producción (Production Stage) ----
-# Se recomienda una imagen Node.js más pequeña para la producción
 FROM node:20-alpine AS runner
-
-# Establece el directorio de trabajo
 WORKDIR /app
 
-# Copiar la salida compilada de la etapa 'builder'
-# Esto incluye .output, que tiene el servidor y los assets estáticos.
+# Instalar pnpm en el runner antes de usarlo para instalar dependencias de prod.
+RUN npm install -g pnpm
+
+# COPIAR ARCHIVOS ESENCIALES DEL BUILDER:
+# 1. El código compilado
 COPY --from=builder /app/.output ./.output
-
-# Copiar solo el package.json para poder instalar dependencias de runtime.
+# 2. package.json (para saber qué instalar)
 COPY --from=builder /app/package.json ./
+# 3. pnpm-lock.yaml (¡EL ARCHIVO FALTANTE! Necesario para --frozen-lockfile)
+COPY --from=builder /app/pnpm-lock.yaml ./
 
-# Instalar solo las dependencias de PRODUCCIÓN necesarias para el runtime del servidor.
-# Usamos el script de la etapa anterior para esto
-RUN npm install -g pnpm && pnpm install --prod --frozen-lockfile --ignore-scripts
+# Instalar solo las dependencias de PRODUCCIÓN.
+# Usamos --frozen-lockfile para mayor seguridad y consistencia.
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
-# Expone el puerto que usa Nuxt por defecto
 EXPOSE 3000
 
-# Define la variable de entorno para indicar que estamos en producción
 ENV NODE_ENV=production
 
 # Comando para iniciar el servidor de Nuxt compilado
