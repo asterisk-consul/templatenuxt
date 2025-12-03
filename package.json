@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nuxt build",
+    "prebuild": "node -e \"try { const fs = require('fs'); if (fs.existsSync('node_modules/oxc-parser')) { console.log('oxc-parser presente') } } catch(e) {}\"",
+    "build": "OXC_BINDINGS_FORCE_BUILD=1 nuxt build",
     "dev": "nuxt dev",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",

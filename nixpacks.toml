@@ -1,9 +1,6 @@
 [phases.setup]
 nixPkgs = ["nodejs_22", "pnpm", "python3", "gcc", "gnumake"]
 
-[phases.install]
-cmd = "rm -rf node_modules && pnpm install --no-frozen-lockfile"
-
 [phases.build]
 cmd = "pnpm run build"
 

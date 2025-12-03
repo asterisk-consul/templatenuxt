@@ -6,6 +6,14 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     ['@pinia/nuxt', { autoImports: ['defineStore', 'storeToRefs'] }] // 👈 así se pasan las opciones
   ],
+
+    experimental: {
+    watcher: 'chokidar',
+    componentIslands: false
+  },
+      typescript: {
+    typeCheck: false  // Desactivar temporalmente durante build
+  },
   ssr: false,
   imports: {
     dirs: [
@@ -48,6 +56,7 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'static' // Para generar archivos estáticos
   },
+
 
   eslint: {
     config: {
