@@ -58,7 +58,6 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'static' // Para generar archivos estáticos
   },
-
   eslint: {
     config: {
       stylistic: {
