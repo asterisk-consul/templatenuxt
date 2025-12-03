@@ -1,18 +1,17 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
-    '@nuxt/eslint',
     '@nuxt/ui',
     '@vueuse/nuxt',
     ['@pinia/nuxt', { autoImports: ['defineStore', 'storeToRefs'] }] // 👈 así se pasan las opciones
   ],
 
-    experimental: {
+  experimental: {
     watcher: 'chokidar',
     componentIslands: false
   },
-      typescript: {
-    typeCheck: false  // Desactivar temporalmente durante build
+  typescript: {
+    typeCheck: false // Desactivar temporalmente durante build
   },
   ssr: false,
   imports: {
@@ -56,7 +55,6 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'static' // Para generar archivos estáticos
   },
-
 
   eslint: {
     config: {
