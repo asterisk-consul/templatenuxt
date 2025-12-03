@@ -39,6 +39,7 @@ RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 EXPOSE 3000
 
 ENV NODE_ENV=production
+ENV NUXT_HOST=0.0.0.0
 
 # Comando para iniciar el servidor de Nuxt compilado
 CMD ["node", ".output/server/index.mjs"]
