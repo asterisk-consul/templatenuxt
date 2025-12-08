@@ -18,6 +18,11 @@ export const navigationLinks = [
       to: '/Vcompras'
     },
     {
+      label: 'BOM',
+      icon: 'i-lucide-folder-closed',
+      to: '/bom'
+    },
+    {
       label: 'Settings',
       to: '/settings',
       icon: 'i-lucide-settings',

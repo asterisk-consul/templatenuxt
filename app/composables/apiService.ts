@@ -10,7 +10,17 @@ export async function fetchData<T>(endpoint: string) {
   const headers: HeadersInit = {}
   if (token) headers['Authorization'] = `Bearer ${token}`
 
-  return await $fetch<T>(`${config.public.apiBase}${endpoint}`, { headers })
+  const { data, error } = await useFetch<T>(
+    `${config.public.apiBase}${endpoint}`,
+    {
+      headers,
+      server: false // IMPORTANTE: ejecutarlo solo en cliente
+    }
+  )
+
+  if (error.value) throw error.value
+
+  return data // esto es un ref<T>
 }
 
 export async function postData<T, B extends Record<string, any>>(
