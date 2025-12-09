@@ -123,7 +123,7 @@ const columns: TableColumn<NodoArbol>[] = [
       const price = Number(row.original.precioUnitario)
       return new Intl.NumberFormat('es-AR', {
         style: 'currency',
-        currency: 'ARS'
+        currency: 'USD'
       }).format(price)
     }
   },
@@ -137,7 +137,7 @@ const columns: TableColumn<NodoArbol>[] = [
         { class: 'text-right font-medium' },
         new Intl.NumberFormat('es-AR', {
           style: 'currency',
-          currency: 'ARS'
+          currency: 'USD'
         }).format(total)
       )
     }

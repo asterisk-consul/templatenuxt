@@ -8,19 +8,22 @@ export const navigationLinks = [
       to: '/'
     },
     {
-      label: 'Kilometros',
-      icon: 'i-lucide-truck',
-      to: '/VKilomentros'
-    },
-    {
-      label: 'Compras',
+      label: 'Articulos',
       icon: 'i-lucide-folder-closed',
-      to: '/Vcompras'
-    },
-    {
-      label: 'BOM',
-      icon: 'i-lucide-folder-closed',
-      to: '/bom'
+      children: [
+        {
+          label: 'Articulos',
+          to: '/articulos'
+        },
+        {
+          label: 'Listas Maestra',
+          to: '/listamaestra'
+        },
+        {
+          label: 'BOM',
+          to: '/bom'
+        }
+      ]
     },
     {
       label: 'Settings',

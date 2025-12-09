@@ -71,7 +71,7 @@ export async function loginApi1(username: string, password: string) {
 
 export async function loginApi2(username: string, password: string) {
   const config = useRuntimeConfig()
-  return $fetch(`${config.public.apiBase2}/auth/login`, {
+  return $fetch(`${config.public.apiBase2}/api/login`, {
     method: 'POST',
     body: { username, password }
   })
