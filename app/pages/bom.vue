@@ -1,6 +1,7 @@
 <script setup>
 import ArbolCostosTable from '~/components/articulos/ArbolCostosBom.vue'
-const data = await fetchData('/articulos/arbol-costos/1118')
+const data = await fetchData('/articulos/arbol-costos/1118', { api: 'api2' })
+console.log('data', data.value)
 </script>
 
 <template>

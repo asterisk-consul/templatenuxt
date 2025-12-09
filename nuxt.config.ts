@@ -36,9 +36,13 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
-    apiBase: process.env.API_BASE, // solo server
+    apiBase1: process.env.API_BASE1,
+    apiBase2: process.env.API_BASE2,
+    // solo server
     public: {
-      apiBase: process.env.PUBLIC_API_BASE // visible en cliente
+      apiBase1: process.env.PUBLIC_API_BASE1,
+      apiBase2: process.env.PUBLIC_API_BASE2
+      // visible en cliente
     }
   },
 

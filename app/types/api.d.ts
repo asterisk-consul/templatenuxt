@@ -71,6 +71,10 @@ declare global {
     perfilid: any
   }
 
+  export interface ApiArticulosdata {
+   value: ApiArticulos
+  }
+
   export interface ApiArticulos {
     cols: string[]
     showableColumns: string[]

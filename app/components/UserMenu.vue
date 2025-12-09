@@ -160,7 +160,7 @@ const items = computed<DropdownMenuItem[][]>(() => [
       icon: 'i-lucide-log-out',
       onSelect: () => {
         const auth = useAuthStore()
-        auth.clearCredentials() // 🔹 Limpia token, cookies y userData
+        auth.logout() // 🔹 Limpia token, cookies y userData
         navigateTo('/login') // 🔹 Redirige al login
       }
     }

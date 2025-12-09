@@ -15,16 +15,16 @@ export const useArticulosStore = defineStore('articulos', () => {
   const { tableColumns } = useTableColumns<RowArticulos>(showableColumns, rows)
 
   const fetchArticulos = async () => {
-    const data: ApiArticulos = await fetchData('/articulo/index')
+    const data : ApiArticulosdata = await fetchData('/articulo/index', { api: 'api1' })
 
-    rows.value = data.rows
-    cols.value = data.cols
-    showableColumns.value = data.showableColumns
-    total.value = data.total
+    rows.value = data.value.rows
+    cols.value = data.value.cols
+    showableColumns.value = data.value.showableColumns
+    total.value = data.value.total
 
     // Si no definís campos de filtro, usar todas las showableColumns
     if (filterFields.value.length === 0) {
-      filterFields.value = [...data.showableColumns]
+      filterFields.value = [...data.value.showableColumns]
     }
   }
 
