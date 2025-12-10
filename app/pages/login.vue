@@ -26,11 +26,16 @@ const fields: AuthFormField[] = [
     type: 'checkbox'
   }
 ]
-
 const schema = z.object({
-  username: z.string('Username requerido').min(3, 'Mínimo 3 caracteres'),
-  password: z.string('Password requerido').min(4, 'Mínimo 4 caracteres')
-})
+  username: z.string({
+    required_error: 'Username requerido'
+  }).min(3, 'Mínimo 3 caracteres'),
+
+  password: z.string({
+    required_error: 'Password requerido'
+  }).min(4, 'Mínimo 4 caracteres')
+});
+
 
 type Schema = z.output<typeof schema>
 

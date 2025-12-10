@@ -6,6 +6,8 @@ export const useArticulosStore = defineStore('articulos', () => {
   const cols = ref<string[]>([])
   const showableColumns = ref<string[]>([])
   const total = ref(0)
+  const articuloEdit = ref<RowArticulos | null>(null)
+  const loading = ref(false)
 
   // 🔎 Filtros reactivos
   const search = ref('')
@@ -15,6 +17,7 @@ export const useArticulosStore = defineStore('articulos', () => {
   const { tableColumns } = useTableColumns<RowArticulos>(showableColumns, rows)
 
   const fetchArticulos = async () => {
+    loading.value = true
     const data : ApiArticulosdata = await fetchData('/articulo/index', { api: 'api1' })
 
     rows.value = data.value.rows
@@ -26,6 +29,7 @@ export const useArticulosStore = defineStore('articulos', () => {
     if (filterFields.value.length === 0) {
       filterFields.value = [...data.value.showableColumns]
     }
+    loading.value = false
   }
 
   const columnFilters = ref<Record<string, string[]>>({}) // { 'categoria': ['A', 'B'], 'marca': ['X'] }
@@ -101,6 +105,14 @@ export const useArticulosStore = defineStore('articulos', () => {
       return plano
     })
   })
+  const fetchArticuloById = async (id: number) => {
+    loading.value = true
+    const data: ApiArticulosdata = await fetchData(`/articulo/${id}`, {
+      api: 'api1'
+    })
+    loading.value = false
+    articuloEdit.value = data.value
+  }
 
   return {
     rows,
@@ -109,11 +121,14 @@ export const useArticulosStore = defineStore('articulos', () => {
     showableColumns,
     tableColumns,
     filteredRows,
+    loading,
     search,
     filterFields,
     columnFilters,
     uniqueColumnValues,
     fetchArticulos,
+    fetchArticuloById,
+    articuloEdit,
     exportRows
   }
 })
