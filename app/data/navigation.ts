@@ -13,17 +13,23 @@ export const navigationLinks = [
       children: [
         {
           label: 'Articulos',
-          to: '/articulos'
+          to: '/articulos/'
         },
         {
           label: 'Listas Maestra',
-          to: '/listamaestra'
+          to: '/listamaestra/'
         },
         {
           label: 'BOM',
-          to: '/bom'
+          to: '/bom/'
         }
       ]
+    },
+
+    {
+      label: 'Cotizacion del dolar',
+      to: '/cotizaciones',
+      icon: 'i-lucide-dollar-sign'
     },
     {
       label: 'Settings',

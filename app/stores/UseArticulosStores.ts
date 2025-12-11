@@ -1,12 +1,13 @@
 // stores/articulos.ts
 import { useTableColumns } from '@/composables/useTableColumns'
+import { ArticuloEditSchema } from '@/schemas/ArticuloApiSchema'
 
 export const useArticulosStore = defineStore('articulos', () => {
   const rows = ref<RowArticulos[]>([])
   const cols = ref<string[]>([])
   const showableColumns = ref<string[]>([])
   const total = ref(0)
-  const articuloEdit = ref<RowArticulos | null>(null)
+  const articuloEdit = ref<Partial<ArticulosApiN>>({})
   const loading = ref(false)
 
   // 🔎 Filtros reactivos
@@ -18,17 +19,56 @@ export const useArticulosStore = defineStore('articulos', () => {
 
   const fetchArticulos = async () => {
     loading.value = true
-    const data : ApiArticulosdata = await fetchData('/articulo/index', { api: 'api1' })
 
-    rows.value = data.value.rows
-    cols.value = data.value.cols
-    showableColumns.value = data.value.showableColumns
-    total.value = data.value.total
+    const { value: data } =
+      (await fetchData<ApiArticulos>('/articulo/index', {
+        api: 'api1'
+      })) ?? {}
 
-    // Si no definís campos de filtro, usar todas las showableColumns
-    if (filterFields.value.length === 0) {
-      filterFields.value = [...data.value.showableColumns]
+    if (!data) {
+      throw new Error('Sin datos')
     }
+
+    rows.value = data.rows
+    cols.value = data.cols
+    showableColumns.value = data.showableColumns
+    total.value = data.total
+
+    if (filterFields.value.length === 0) {
+      filterFields.value = [...data.showableColumns]
+    }
+
+    loading.value = false
+  }
+
+  const fetchArticuloById = async (id: string) => {
+    loading.value = true
+    const data: DataApi = await fetchData(`/articulos/${id}`, { api: 'api2' })
+
+    const parsed = ArticuloEditSchema.safeParse(data.value)
+    if (parsed.success) {
+      articuloEdit.value = data.value
+    } else {
+      console.error('Datos inválidos del artículo:', parsed.error)
+      articuloEdit.value = {}
+    }
+
+    loading.value = false
+  }
+  const fetchArticuloBom = async (id: string) => {
+    loading.value = true
+    const data: DataApi = await fetchData(`/articulos/bom/${id}`, {
+      api: 'api2'
+    })
+
+    const parsed = ArticuloEditSchema.safeParse(data.value)
+    if (parsed.success) {
+      articuloEdit.value = data.value
+    } else {
+      console.error('Datos inválidos del artículo:', parsed.error)
+      articuloEdit.value = {}
+    }
+
     loading.value = false
   }
 
@@ -43,12 +83,13 @@ export const useArticulosStore = defineStore('articulos', () => {
       values[col] = new Set()
     })
 
-    // Recorrer filas una sola vez
+    // Recorrer filas
     rows.value.forEach((row) => {
       showableColumns.value.forEach((col) => {
-        const val = row[col]
+        const key = col as keyof RowArticulos
+        const val = row[key]
         if (val != null && val !== '') {
-          values[col].add(String(val))
+          values[col]!.add(String(val)) // <-- el '!' indica que no es undefined
         }
       })
     })
@@ -56,7 +97,7 @@ export const useArticulosStore = defineStore('articulos', () => {
     // Convertir a arrays ordenados
     const result: Record<string, string[]> = {}
     Object.keys(values).forEach((col) => {
-      result[col] = Array.from(values[col]).sort()
+      result[col] = Array.from(values[col]!).sort() // <-- '!' nuevamente
     })
 
     return result
@@ -68,14 +109,15 @@ export const useArticulosStore = defineStore('articulos', () => {
 
     // 1. Aplicar filtros de columna
     const activeCols = Object.keys(columnFilters.value).filter(
-      (col) => columnFilters.value[col]?.length > 0
+      (col) => (columnFilters.value[col] ?? []).length > 0
     )
 
     if (activeCols.length > 0) {
       result = result.filter((row) => {
         return activeCols.every((col) => {
-          const selectedValues = columnFilters.value[col]
-          const rowValue = String(row[col] ?? '')
+          const key = col as keyof RowArticulos
+          const selectedValues = columnFilters.value[col] ?? []
+          const rowValue = String(row[key] ?? '')
           return selectedValues.includes(rowValue)
         })
       })
@@ -88,31 +130,25 @@ export const useArticulosStore = defineStore('articulos', () => {
 
     return result.filter((row) =>
       filterFields.value.some((field) => {
-        const value = row[field]
-        return value && String(value).toLowerCase().includes(q)
+        const fieldKey = field as keyof RowArticulos
+        const value = row[fieldKey]
+        return value != null && String(value).toLowerCase().includes(q)
       })
     )
   })
+
   const exportRows = computed(() => {
     return filteredRows.value.map((row) => {
       const plano: Record<string, any> = {}
 
       showableColumns.value.forEach((col) => {
-        // Copio solo datos crudos y simples
-        plano[col] = row[col] ?? null
+        const key = col as keyof RowArticulos // <-- le decimos a TS que col es una propiedad
+        plano[col] = row[key] ?? null
       })
 
       return plano
     })
   })
-  const fetchArticuloById = async (id: number) => {
-    loading.value = true
-    const data: ApiArticulosdata = await fetchData(`/articulo/${id}`, {
-      api: 'api1'
-    })
-    loading.value = false
-    articuloEdit.value = data.value
-  }
 
   return {
     rows,

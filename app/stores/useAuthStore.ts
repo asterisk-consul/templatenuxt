@@ -14,7 +14,9 @@ export const useAuthStore = defineStore('auth', () => {
   if (tokenApi1Cookie.value) setApiToken('api1', tokenApi1Cookie.value)
   if (tokenApi2Cookie.value) setApiToken('api2', tokenApi2Cookie.value)
 
-  const isLogged = computed(() => !!tokenApi1Cookie.value || !!tokenApi2Cookie.value)
+  const isLogged = computed(
+    () => !!tokenApi1Cookie.value || !!tokenApi2Cookie.value
+  )
 
   async function login(username: string, password: string) {
     // Llamar a ambas APIs en paralelo; usar try/catch para manejar fallos
@@ -25,7 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
       ])
 
       userData.value = res2?.user ?? null
-      
+
       // Asumo que cada response incluye access_token y expires_in (ajustar según API)
       const token1 = res1?.access_token ?? null
       const token2 = res2?.access_token ?? null

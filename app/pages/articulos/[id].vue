@@ -1,31 +1,51 @@
 <script setup lang="ts">
 import { useArticulosStore } from '@/stores/UseArticulosStores'
+import FormArticulos from '~/components/articulos/FormularioArticulo/FormArticulos.vue'
 
 const route = useRoute()
 const articulosStore = useArticulosStore()
+const id = route.params.id as string
 
-const id = Number(route.params.id)
+// Modo edición
+const editando = ref(false)
 
 onMounted(async () => {
   await articulosStore.fetchArticuloById(id)
+  console.log('articuloEdit', articulosStore.articuloEdit)
 })
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="text-2xl font-semibold mb-4">
-      Editar artículo #{{ id }}
-    </h1>
+  <UDashboardPanel id="articulos">
+    <template #header>
+      <UDashboardNavbar title="Articulos">
+        <template #leading>
+          <UDashboardSidebarCollapse />
+        </template>
+      </UDashboardNavbar>
+    </template>
 
-    <div v-if="articulosStore.loading">Cargando…</div>
-    <div v-else>
-      <UForm :state="articulosStore.articuloEdit">
-        <UFormGroup label="Nombre">
-          <UInput v-model="articulosStore.articuloEdit.nombre" />
-        </UFormGroup>
+    <template #body>
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-semibold">
+          {{ articulosStore.articuloEdit?.nombre }}
+        </h1>
 
-        <UButton color="primary">Guardar</UButton>
-      </UForm>
-    </div>
-  </div>
+        <UButton @click="editando = !editando">
+          {{ editando ? 'Cancelar' : 'Editar' }}
+        </UButton>
+      </div>
+
+      <div v-if="articulosStore.loading">Cargando…</div>
+
+      <div v-else>
+        <UCard class="p-6 w-full">
+          <FormArticulos
+            :articuloEdit="articulosStore.articuloEdit"
+            :disabled="!editando"
+          />
+        </UCard>
+      </div>
+    </template>
+  </UDashboardPanel>
 </template>

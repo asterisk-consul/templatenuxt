@@ -13,10 +13,7 @@ function baseUrlFor(api: ApiKey) {
 }
 
 /* Fetch GET — devuelve ref<T> (useFetch) */
-export async function fetchData<T>(
-  endpoint: string,
-  opts: { api: ApiKey }
-) {
+export async function fetchData<T>(endpoint: string, opts: { api: ApiKey }) {
   const baseURL = baseUrlFor(opts.api)
   const token = getApiToken(opts.api)
 
@@ -41,12 +38,12 @@ export async function postData<T, B extends Record<string, any>>(
   const baseURL = baseUrlFor(opts.api)
   const token = getApiToken(opts.api)
 
-  const headers: Record<string,string> = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {})
   }
 
-  console.log('baseURL',baseURL)
+  console.log('baseURL', baseURL)
   let status = 0
   const data = await $fetch<T>(`${baseURL}${endpoint}`, {
     method: 'POST',

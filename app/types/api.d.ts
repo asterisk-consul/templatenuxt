@@ -1,5 +1,9 @@
 // types/api.d.ts
 declare global {
+  interface DataApi {
+    value: any
+  }
+
   interface ApiResponse<T = any> {
     status: number
     data: ApiRegistroCabList | T
@@ -12,6 +16,15 @@ declare global {
     cols: string[]
     rows: Row[]
     total: number
+  }
+
+  export interface ApiDolar {
+    compra: number
+    venta: number
+    casa: string
+    nombre: string
+    moneda: string
+    fechaActualizacion: string
   }
 
   export interface Row {
@@ -72,7 +85,7 @@ declare global {
   }
 
   export interface ApiArticulosdata {
-   value: ApiArticulos
+    value: ApiArticulos
   }
 
   export interface ApiArticulos {
@@ -116,6 +129,95 @@ declare global {
     'categoriaAbuelo.name'?: string
     'categoriaAbuelo.grupo'?: string
     'categoriaAbuelo.parentid'?: number
+  }
+
+  export interface ArticulosApiN {
+    id: string
+    internalcode: string
+    externalcode: string
+    nombre: string
+    descrip: any
+    categid: string
+    instructivoid: any
+    caracteristicas: any
+    activo: boolean
+    cantidadunidad: any
+    puntorepo: any
+    nivelobj: any
+    cantminrepo: any
+    imagen: any
+    um: any
+    ub: any
+    isbom: boolean
+    compraminima: any
+    statusinicial: any
+    impuestoalic: any
+    isservice: boolean
+    ischeque: boolean
+    cuentacontableid: any
+    isamedida: boolean
+    articuloespec: any[]
+    articuloprecio: any[]
+    articulopreciohistorico: Articulopreciohistorico[]
+    depositosarticulos: Depositosarticulo[]
+    hijos: Hijo[]
+    tipoarticulos: Tipoarticulo[]
+    perfilesarticulos: any[]
+    articulos_padre: ArticulosPadre[]
+  }
+
+  export interface Articulopreciohistorico {
+    id: number
+    articuloid: number
+    categid: number
+    precio: Precio
+    changedate: Changedate
+    factorconversion: number
+  }
+
+  export interface Precio {
+    s: number
+    e: number
+    d: number[]
+  }
+
+  export interface Changedate {}
+
+  export interface Depositosarticulo {
+    depositos: Depositos
+  }
+
+  export interface Depositos {
+    id: string
+    descrip: string
+  }
+
+  export interface Hijo {
+    id: string
+    articuloid: string
+    parentarticuloid: string
+    cantidad: number
+    compvariableid: any
+    cuentacontableid: any
+    ancho: any
+    largo: any
+  }
+
+  export interface Tipoarticulo {
+    id: number
+    categid: string
+    articuloid: string
+  }
+
+  export interface ArticulosPadre {
+    id: string
+    articuloid: string
+    parentarticuloid: string
+    cantidad: number
+    compvariableid: any
+    cuentacontableid: any
+    ancho: any
+    largo: any
   }
 }
 
