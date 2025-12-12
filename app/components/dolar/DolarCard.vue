@@ -1,23 +1,37 @@
 <template>
-  <div
-    class="bg-slate-800/70 backdrop-blur-md border border-slate-700 rounded-xl p-6 flex flex-col gap-3 shadow-lg hover:shadow-xl transition-all duration-200"
+  <UCard
+    :ui="{
+      body: 'p-4'
+    }"
+    variant="soft"
+    class="border-2 border-gray-200 dark:border-gray-700"
   >
-    <h2 class="text-xl font-semibold text-white text-center">{{ title }}</h2>
+    <template #header>
+      <h5
+        class="text-2xl font-semibold text-gray-800 dark:text-white text-center"
+      >
+        {{ title }}
+      </h5>
+    </template>
 
-    <div class="flex justify-between mt-2">
-      <div class="flex flex-col text-left">
-        <span class="text-slate-400 text-sm">COMPRA</span>
-        <span class="text-lg font-bold text-white">${{ compra }}</span>
+    <div class="flex justify-center items-center gap-16">
+      <div class="flex flex-col items-center">
+        <span class="text-gray-600 dark:text-slate-400 text-lg">COMPRA</span>
+        <span class="text-xl font-bold text-gray-800 dark:text-white">
+          ${{ compra }}
+        </span>
       </div>
 
-      <div class="flex flex-col text-right">
-        <span class="text-slate-400 text-sm">VENTA</span>
-        <span class="text-lg font-bold text-white">${{ venta }}</span>
+      <div class="flex flex-col items-center">
+        <span class="text-gray-600 dark:text-slate-400 text-lgs">VENTA</span>
+        <span class="text-xl font-bold text-gray-800 dark:text-white">
+          ${{ venta }}
+        </span>
       </div>
     </div>
 
     <slot />
-  </div>
+  </UCard>
 </template>
 
 <script setup lang="ts">

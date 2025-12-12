@@ -23,10 +23,7 @@ onMounted(async () => {
           <UDashboardSidebarCollapse />
         </template>
       </UDashboardNavbar>
-    </template>
-
-    <template #body>
-      <div class="flex items-center justify-between mb-4">
+      <UDashboardToolbar class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">
           {{ articulosStore.articuloEdit?.nombre }}
         </h1>
@@ -34,9 +31,20 @@ onMounted(async () => {
         <UButton @click="editando = !editando">
           {{ editando ? 'Cancelar' : 'Editar' }}
         </UButton>
-      </div>
+      </UDashboardToolbar>
+    </template>
 
-      <div v-if="articulosStore.loading">Cargando…</div>
+    <template #body>
+      <div v-if="articulosStore.loading">
+        <div class="flex items-center gap-4">
+          <USkeleton class="h-12 w-12 rounded-full" />
+
+          <div class="grid gap-2">
+            <USkeleton class="h-4 w-[250px]" />
+            <USkeleton class="h-4 w-[200px]" />
+          </div>
+        </div>
+      </div>
 
       <div v-else>
         <UCard class="p-6 w-full">
