@@ -2,6 +2,8 @@
 import { ref, computed, watch } from 'vue'
 import LockedInput from '~/components/articulos/FormularioArticulo/ui/LocketInput.vue'
 
+const articulosStore = useArticulosStore()
+
 // Props
 interface Hijo {
   id: string
@@ -91,6 +93,9 @@ watch(
   },
   { deep: true }
 )
+onMounted(async () => {
+  await articulosStore.getArticuloById(id)
+})
 </script>
 
 <template>
