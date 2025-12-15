@@ -13,7 +13,13 @@ function baseUrlFor(api: ApiKey) {
 }
 
 /* Fetch GET — devuelve ref<T> (useFetch) */
-export async function fetchData<T>(endpoint: string, opts: { api: ApiKey }) {
+export async function fetchData<T>(
+  endpoint: string,
+  opts: {
+    api: ApiKey
+    query?: Record<string, any>
+  }
+) {
   const baseURL = baseUrlFor(opts.api)
   const token = getApiToken(opts.api)
 
@@ -22,11 +28,12 @@ export async function fetchData<T>(endpoint: string, opts: { api: ApiKey }) {
 
   const { data, error } = await useFetch<T>(`${baseURL}${endpoint}`, {
     headers,
-    server: false // cliente
+    query: opts.query,
+    server: false
   })
 
   if (error.value) throw error.value
-  return data // ref<T>
+  return data // Ref<T | null>
 }
 
 /* POST usando $fetch — devuelve { data, status } */

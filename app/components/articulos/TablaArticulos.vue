@@ -6,6 +6,7 @@ import { useArticulosTable } from '@/composables/useArticuloTable'
 const articulosStore = useArticulosStore()
 
 const { exportCSV, exportExcel, exportJSON } = useExportData()
+
 const {
   tableColumns,
   filteredRows,
@@ -196,6 +197,12 @@ onMounted(async () => {
       </template>
     </UPopover>
   </div>
+  <!--
+  <USelect
+    v-model="articulosStore.showableColumns"
+    multiple
+    :items="articulosStore.cols"
+  /> -->
 
   <UTable
     ref="table"

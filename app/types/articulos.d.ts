@@ -27,7 +27,7 @@ declare global {
     tipos: Tipo[]
   }
 
-  interface Articuloprecio {
+  export interface Articuloprecio {
     articuloid: number
     categid: number
     categoria: Categoria
@@ -80,6 +80,40 @@ declare global {
     articuloid: number
     categid: number
     id: number
+  }
+
+  interface ArbolCostosNodo {
+    id: bigint
+    nombre: string
+    precioUnitario: number
+    cantidad: number
+    costoTotal: number
+    hijos: ArbolCostosNodo[]
+  }
+
+  type NodoListaMaestra = {
+    id: bigint
+    nombre: string
+    internalcode: string | null
+    externalcode: string | null
+    cantidad: number
+    ancho: number | null
+    largo: number | null
+    um: string | null
+    ub: number | null
+    esTerminal: boolean
+    depositos?: {
+      id: bigint
+      cantidad: number
+      deposito: string
+    }[]
+
+    categorias?: {
+      id: bigint
+      name: string
+    }[]
+
+    hijos: NodoListaMaestra[]
   }
 }
 

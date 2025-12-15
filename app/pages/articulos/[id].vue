@@ -11,7 +11,6 @@ const editando = ref(false)
 
 onMounted(async () => {
   await articulosStore.fetchArticuloById(id)
-  console.log('articuloEdit', articulosStore.articuloEdit)
 })
 </script>
 
@@ -25,7 +24,7 @@ onMounted(async () => {
       </UDashboardNavbar>
       <UDashboardToolbar class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">
-          {{ articulosStore.articuloEdit?.nombre }}
+          {{ articulosStore.articuloActual?.nombre }}
         </h1>
 
         <UButton @click="editando = !editando">
@@ -49,7 +48,7 @@ onMounted(async () => {
       <div v-else>
         <UCard class="p-6 w-full">
           <FormArticulos
-            :articuloEdit="articulosStore.articuloEdit"
+            :articuloEdit="articulosStore.articuloActual"
             :disabled="!editando"
           />
         </UCard>

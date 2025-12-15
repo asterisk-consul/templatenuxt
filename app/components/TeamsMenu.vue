@@ -5,13 +5,8 @@ defineProps<{ collapsed?: boolean }>()
 
 const teams = [
   {
-    label: 'Don Andres',
-    avatar: { src: '/img/donandres.webp', alt: 'Don Andres' }
-  },
-  {
-    label: 'Flowid',
-    avatar: { src: '/img/LogoFlows.png', alt: 'flows' },
-    url: 'https://flowsma.com/donandres/#/workspace'
+    label: 'Template',
+    avatar: { src: '/img/logo.webp', alt: 'Template' }
   }
 ]
 

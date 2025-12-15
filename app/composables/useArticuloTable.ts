@@ -3,15 +3,24 @@ import { useTableColumns } from '@/composables/useTableColumns'
 
 export function useArticulosTable(
   rows: Ref<RowArticulos[]>,
-  showableColumns: Ref<Array<keyof RowArticulos>>
+  showableColumns: Ref<string[]>
 ) {
   const search = ref('')
-  const filterFields = ref<string[]>([])
+  const filterFields = computed<string[]>(() => showableColumns.value)
   const columnFilters = ref<Record<string, string[]>>({})
 
   // columnas UTable
-  const { tableColumns } = useTableColumns<RowArticulos>(showableColumns, rows)
+  const { tableColumns } = useTableColumns(showableColumns, rows, {
+    clickable: ['id', 'nombre'],
+    linkTo: (row) => `/articulos/${row['articulos.id']}`
+  })
 
+  function getRowValue(row: any, col: string) {
+    // soporta 'categorias.name' → row['categorias']['name']
+    return col
+      .split('.')
+      .reduce((acc, key) => (acc ? acc[key] : undefined), row)
+  }
   // valores únicos por columna
 
   const uniqueColumnValues = computed(() => {
@@ -23,7 +32,8 @@ export function useArticulosTable(
 
     rows.value.forEach((row) => {
       showableColumns.value.forEach((col) => {
-        const val = row[col]
+        const val = getRowValue(row, col)
+
         if (val != null && val !== '') {
           sets[col]?.add(String(val))
         }

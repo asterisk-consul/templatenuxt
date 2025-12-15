@@ -59,14 +59,18 @@ function rebuild() {
 rebuild()
 
 watch(expanded, () => rebuild(), { deep: true })
-watch(() => props.data, () => rebuild(), { deep: true })
+watch(
+  () => props.data,
+  () => rebuild(),
+  { deep: true }
+)
 
 // ==========================================================
 // Toggle
 // ==========================================================
 function toggle(id: string | number) {
   if (expanded.value.has(id)) {
-    expanded.value = new Set([...expanded.value].filter(i => i !== id))
+    expanded.value = new Set([...expanded.value].filter((i) => i !== id))
   } else {
     expanded.value = new Set([...expanded.value, id])
   }
@@ -159,9 +163,11 @@ const columns: TableColumn<NodoArbol>[] = [
     :data="flatData"
     :columns="columns"
     :ui="{
-      root: 'min-w-full',
-      th: 'text-left bg-gray-100 font-semibold',
-      td: 'align-top py-2 border-b'
+      base: 'table-fixed border-separate border-spacing-0',
+      thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+      tbody: '[&>tr]:last:[&>td]:border-b-0',
+      th: 'first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
+      td: 'border-b border-default'
     }"
   />
 </template>
