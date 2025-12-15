@@ -30,7 +30,6 @@ declare global {
   export interface Articuloprecio {
     articuloid: number
     categid: number
-    categoria: Categoria
     changedate: string
     factorconversion: number
     id: number

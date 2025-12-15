@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useCategorias } from '@/composables/useCategorias'
 import type { DropdownMenuItem } from '@nuxt/ui'
+import ModalPrecio from './ModalPrecio.vue'
 
 import { columns } from './columns'
 
@@ -14,6 +15,8 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const modalOpen = ref(false)
+const selectedPrecio = ref<Articuloprecio | null>(null)
 
 function getDropdownActions(row: Articuloprecio): DropdownMenuItem[][] {
   return [
@@ -22,7 +25,8 @@ function getDropdownActions(row: Articuloprecio): DropdownMenuItem[][] {
         label: 'Editar',
         icon: 'i-lucide-edit',
         onClick: () => {
-          console.log(row)
+          selectedPrecio.value = row
+          modalOpen.value = true
         }
       },
       {
@@ -37,8 +41,23 @@ function getDropdownActions(row: Articuloprecio): DropdownMenuItem[][] {
   ]
 }
 
+function handleSave(precio: Articuloprecio) {
+  if (precio.id) {
+    // editar
+    console.log('EDIT', precio)
+  } else {
+    // crear
+    console.log('CREATE', precio)
+  }
+
+  modalOpen.value = false
+  selectedPrecio.value = null
+}
+
+
 onMounted(async () => {
   await load()
+  console.log(props.form.articuloprecio)
 })
 </script>
 
@@ -59,4 +78,15 @@ onMounted(async () => {
       </UDropdownMenu>
     </template>
   </UTable>
+<UModal v-model:open="modalOpen">
+  <template #content>
+    
+  <ModalPrecio
+    :model-value="selectedPrecio"
+    @save="handleSave"
+    @cancel="modalOpen = false"
+  />
+</template>
+</UModal>
+
 </template>

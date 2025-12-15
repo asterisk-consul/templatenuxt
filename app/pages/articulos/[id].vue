@@ -5,9 +5,17 @@ import FormArticulos from '~/components/articulos/FormularioArticulo/FormArticul
 const route = useRoute()
 const articulosStore = useArticulosStore()
 const id = route.params.id as string
-
+const router = useRouter()
 // Modo edición
 const editando = ref(false)
+const loading = ref(true)
+
+watch(
+  () => articulosStore.articuloActual,
+  () => {
+    loading.value = false
+  }
+)
 
 onMounted(async () => {
   await articulosStore.fetchArticuloById(id)
@@ -17,12 +25,15 @@ onMounted(async () => {
 <template>
   <UDashboardPanel id="articulos">
     <template #header>
-      <UDashboardNavbar title="Articulos">
+      <UDashboardNavbar :title="'Articulos/' + articulosStore.articuloActual?.nombre == null ? '' : articulosStore.articuloActual?.nombre">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
       </UDashboardNavbar>
       <UDashboardToolbar class="flex items-center justify-between mb-4">
+        <UButton color="primary" @click="router.back()">
+          Volver
+        </UButton>
         <h1 class="text-2xl font-semibold">
           {{ articulosStore.articuloActual?.nombre }}
         </h1>
@@ -34,7 +45,7 @@ onMounted(async () => {
     </template>
 
     <template #body>
-      <div v-if="articulosStore.loading">
+      <div v-if="loading">
         <div class="flex items-center gap-4">
           <USkeleton class="h-12 w-12 rounded-full" />
 

@@ -64,7 +64,7 @@ export function useTableColumns<RowType>(
               NuxtLink,
               {
                 to: options.linkTo(row.original),
-                class: 'text-primary underline cursor-pointer'
+                class: 'text-primary cursor-pointer hover:text-primary/80 transition-colors duration-200 hover:underline'
               },
               () => String(realValue)
             )
