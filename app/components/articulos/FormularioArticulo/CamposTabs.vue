@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { tabsItems } from '~/components/articulos/FormularioArticulo/tabs/items'
-import TabsCompuestos from '~/components/articulos/FormularioArticulo/tabs/Compuestos/TabsCompuestos.vue'
+import ListaMaestra from '~/components/articulos/ListaMaestra/ListaMaestra.vue'
 import TabsPrecios from '~/components/articulos/FormularioArticulo/tabs/Precios/TabsPrecios.vue'
 
 interface Props {
@@ -18,7 +18,7 @@ defineProps<Props>()
     </template>
 
     <template #compuestos>
-      <TabsCompuestos :form="form" :disabled="disabled" :id="form.id" />
+      <ListaMaestra :id="form.id" />
     </template>
 
     <template #precios>

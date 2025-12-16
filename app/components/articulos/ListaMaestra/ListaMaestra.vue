@@ -1,29 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, h, resolveComponent, onMounted } from 'vue'
-import type { CellContext } from '@tanstack/vue-table'
-import type { TableColumn } from '@nuxt/ui'
+
 import { VueDraggableNext as draggable } from 'vue-draggable-next'
+import { createColumns } from './columns'
 
 const UCheckbox = resolveComponent('UCheckbox')
 const UBadge = resolveComponent('UBadge')
-
-// ==========================================================
-// Tipos
-// ==========================================================
-type NodoArbol = {
-  id: string | number
-  internalcode: string | null
-  externalcode: string | null
-  nombre: string
-  cantidad: number
-  ancho?: number | null
-  largo?: number | null
-  articulo?: any
-  hijos: NodoArbol[]
-
-  depth?: number
-  parentId?: string | number | null
-}
 
 // ==========================================================
 // Props
@@ -41,46 +23,28 @@ const flatData = ref<NodoArbol[]>([])
 const expanded = ref<Set<string | number>>(new Set())
 const rowSelection = ref<Record<string, boolean>>({})
 const table = useTemplateRef('table')
+const loading = ref<boolean>(false)
 
 // ==========================================================
 // Helpers
 // ==========================================================
-function esTerminal(code?: string | null) {
-  return !!code && code.trim().startsWith('T')
-}
+import { esTerminal } from './helpers'
 
 // ==========================================================
 // Flatten tree
 // ==========================================================
-function flatten(
-  node: NodoArbol,
-  depth = 0,
-  parentId: string | number | null = null
-) {
-  const copy = { ...node, depth, parentId, hijos: node.hijos ?? [] }
-  flatData.value.push(copy)
+import { flatten, rebuild } from './flatten'
 
-  if (expanded.value.has(node.id)) {
-    for (const child of copy.hijos) {
-      flatten(child, depth + 1, node.id)
-    }
-  }
-}
-
-function rebuild() {
-  flatData.value = []
-  articulosStore.listaMaestra.forEach((node) => flatten(node))
-
-  // Inicializar rowSelection
-  flatData.value.forEach((item) => {
-    if (!(item.id in rowSelection.value)) {
-      rowSelection.value[item.id] = false
-    }
-  })
-}
-
-watch(expanded, rebuild, { deep: true })
-watch(() => articulosStore.listaMaestra, rebuild, { deep: true })
+watch(
+  expanded,
+  () => rebuild(articulosStore.listaMaestra, flatData, expanded, rowSelection),
+  { deep: true }
+)
+watch(
+  () => articulosStore.listaMaestra,
+  () => rebuild(articulosStore.listaMaestra, flatData, expanded, rowSelection),
+  { deep: true }
+)
 
 // ==========================================================
 // Toggle
@@ -118,165 +82,38 @@ function onDragChange(evt: any) {
 }
 
 // ==========================================================
-// Columnas
-// ==========================================================
-const columns: TableColumn<NodoArbol, unknown>[] = [
-  {
-    accessorKey: 'select',
-    header: () =>
-      h(UCheckbox, {
-        modelValue: Object.values(rowSelection.value).every(Boolean),
-        indeterminate:
-          Object.values(rowSelection.value).some(Boolean) &&
-          !Object.values(rowSelection.value).every(Boolean),
-        'onUpdate:modelValue': (value: boolean) => {
-          flatData.value.forEach((item) => {
-            rowSelection.value[item.id] = value
-          })
-        },
-        'aria-label': 'Select all'
-      }),
-    cell: ({ row }: CellContext<NodoArbol, unknown>) =>
-      h(UCheckbox, {
-        modelValue: !!rowSelection.value[row.original.id],
-        'onUpdate:modelValue': (value: boolean) => {
-          rowSelection.value[row.original.id] = value
-        },
-        'aria-label': 'Select row'
-      })
-  },
-  {
-    accessorKey: 'nombre',
-    header: 'Artículo',
-    cell: ({ row }: CellContext<NodoArbol, unknown>) => {
-      const item = row.original
-      const isTerminal = esTerminal(item.internalcode)
-
-      return h(
-        'div',
-        { class: 'flex items-center justify-between w-full group' },
-        [
-          // Parte izquierda
-          h('div', { class: 'flex items-center' }, [
-            h('span', {
-              style: { width: `${item.depth! * 1.5}rem` },
-              class: 'inline-block'
-            }),
-            item.parentId !== null
-              ? h(
-                  'span',
-                  { class: 'mr-2 cursor-move text-gray-400 select-none' },
-                  '⋮⋮'
-                )
-              : null,
-            item.hijos?.length
-              ? h(
-                  'button',
-                  {
-                    class:
-                      'mr-2 px-2 py-1 rounded text-xs hover:bg-gray-100 transition-transform duration-300',
-                    onClick: () => toggle(item.id)
-                  },
-                  [
-                    h(
-                      'span',
-                      {
-                        class: [
-                          'inline-block transform transition-transform duration-300',
-                          expanded.value.has(item.id) ? 'rotate-90' : 'rotate-0'
-                        ]
-                      },
-                      '>'
-                    )
-                  ]
-                )
-              : h('span', { class: 'mr-4' }),
-            h(
-              'span',
-              { class: `font-medium ${isTerminal ? 'text-blue-600' : ''}` },
-              item.nombre
-            ),
-            isTerminal
-              ? h(
-                  'span',
-                  { class: 'ml-2 px-1 text-xs bg-blue-100 rounded' },
-                  'T'
-                )
-              : null
-          ]),
-
-          // Parte derecha: botones hover
-          h(
-            'div',
-            { class: 'opacity-0 group-hover:opacity-100 flex space-x-1' },
-            [
-              h(
-                'button',
-                {
-                  class: 'text-sm px-1 py-0.5 border rounded hover:bg-gray-100',
-                  onClick: () => editar(item)
-                },
-                'Editar'
-              ),
-              h(
-                'button',
-                {
-                  class: 'text-sm px-1 py-0.5 border rounded hover:bg-gray-100',
-                  onClick: () => eliminar(item)
-                },
-                'Eliminar'
-              )
-            ]
-          )
-        ]
-      )
-    }
-  },
-  { accessorKey: 'internalcode', header: 'Código interno' },
-  { accessorKey: 'externalcode', header: 'Código externo' },
-  { accessorKey: 'cantidad', header: 'Cantidad' },
-  {
-    id: 'medidas',
-    header: 'Medidas',
-    cell: ({ row }: CellContext<NodoArbol, unknown>) => {
-      const i = row.original
-      if (!esTerminal(i.internalcode)) return ''
-      return `${i.ancho ?? '-'} x ${i.largo ?? '-'}`
-    }
-  },
-  {
-    id: 'tipo',
-    header: 'Tipo',
-    cell: ({ row }: CellContext<NodoArbol, unknown>) => {
-      const articulo = row.original.articulo
-      if (!articulo?.tipoarticulos?.length) return ''
-      return articulo.tipoarticulos[0].categid ?? ''
-    }
-  }
-]
-
-// ==========================================================
 // Funciones de acciones
 // ==========================================================
-function editar(item: NodoArbol) {
-  console.log('Editar', item)
-}
+import { editar, eliminar } from './actions'
+// ==========================================================
+// Columnas
+// ==========================================================
+const columns = createColumns(
+  rowSelection.value,
+  expanded.value,
+  toggle,
+  editar,
+  eliminar,
+  esTerminal,
+  UCheckbox
+)
 
-function eliminar(item: NodoArbol) {
-  console.log('Eliminar', item)
-}
+watch(
+  () => articulosStore.loadingListaMaestra,
+  () => (loading.value = articulosStore.loadingListaMaestra)
+)
 
 // ==========================================================
 // Mounted
 // ==========================================================
 onMounted(async () => {
   await articulosStore.fetchListaMaestra(String(props.id))
-  rebuild()
+  rebuild(articulosStore.listaMaestra, flatData, expanded, rowSelection)
 })
 </script>
 
 <template>
-  <UTable :data="flatData" :columns="columns" ref="table">
+  <UTable :data="flatData" :columns="columns" ref="table" :loading="loading">
     <template #tbody="{ rows }">
       <draggable
         :list="flatData"

@@ -2,35 +2,38 @@ import { h, resolveComponent } from 'vue'
 import type { CellContext } from '@tanstack/vue-table'
 import type { TableColumn } from '@nuxt/ui'
 
-const UCheckbox = resolveComponent('UCheckbox')
-
 export function createColumns(
-  table: any,
-  flatData: NodoArbol[],
+  rowSelection: Record<string, boolean>,
   expanded: Set<string | number>,
   toggle: (id: string | number) => void,
   editar: (item: NodoArbol) => void,
   eliminar: (item: NodoArbol) => void,
-  esTerminal: (code?: string | null) => boolean
+  esTerminal: (code?: string | null) => boolean,
+  UCheckbox: any // TODO: quitar
 ): TableColumn<NodoArbol, unknown>[] {
   return [
     // ---------------- Checkbox de selección ----------------
     {
-      id: 'select',
+      accessorKey: 'select',
       header: () =>
         h(UCheckbox, {
-          modelValue: table.getIsSomePageRowsSelected()
-            ? 'indeterminate'
-            : table.getIsAllPageRowsSelected(),
-          'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
-            table.toggleAllPageRowsSelected(!!value),
+          modelValue: Object.values(rowSelection).every(Boolean),
+          indeterminate:
+            Object.values(rowSelection).some(Boolean) &&
+            !Object.values(rowSelection).every(Boolean),
+          'onUpdate:modelValue': (value: boolean) => {
+            Object.keys(rowSelection).forEach(
+              (id) => (rowSelection[id] = value)
+            )
+          },
           'aria-label': 'Select all'
         }),
       cell: ({ row }: CellContext<NodoArbol, unknown>) =>
         h(UCheckbox, {
-          modelValue: row.getIsSelected(),
-          'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
-            row.toggleSelected(!!value),
+          modelValue: !!rowSelection[row.original.id],
+          'onUpdate:modelValue': (value: boolean) => {
+            rowSelection[row.original.id] = value
+          },
           'aria-label': 'Select row'
         })
     },

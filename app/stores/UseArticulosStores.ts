@@ -14,8 +14,10 @@ export const useArticulosStore = defineStore('articulos', () => {
   // ============================================
   // ESTADO: Artículo individual (vista detalle)
   // ============================================
+  const articulos = ref<Record<string, Partial<ArticulosApiN>>>({})
   const articuloActual = ref<Partial<ArticulosApiN> | null>(null) // Artículo seleccionado
-  const loadingDetalle = ref(false) // Estado de carga para el detalle
+  const loadingDetalle = ref<Record<string, boolean>>({})
+  const loading2 = ref(false)
 
   // ============================================
   // ESTADO: BOM / Árbol de costos
@@ -47,14 +49,40 @@ export const useArticulosStore = defineStore('articulos', () => {
     }
   }
 
-  // GET BY ID - Para vista de detalle de un artículo
-  const fetchArticuloById = async (id: string) => {
-    loadingDetalle.value = true
+  const fetchArticuloById = async (
+    id: string
+  ): Promise<Partial<ArticulosApiN> | null> => {
+    loading2.value = true
     try {
       const result = await ArticulosService.apiGetArticuloById(id)
-      articuloActual.value = result ?? null // Asigna el artículo actual
+      articuloActual.value = result ?? null
+      return articuloActual.value
     } finally {
-      loadingDetalle.value = false
+      loading2.value = false
+    }
+  }
+
+  // GET BY ID - Para vista de detalle de un artículo
+  const fetchArticuloGroupById = async (
+    id: string
+  ): Promise<Partial<ArticulosApiN> | null> => {
+    // Check cache first
+    if (articulos.value[id]) {
+      return articulos.value[id] ?? null
+    }
+
+    loadingDetalle.value[id] = true
+
+    try {
+      const result = await ArticulosService.apiGetArticuloById(id)
+
+      // Ensure we always return null instead of undefined
+      const article = result ?? null
+      articulos.value[id] = article
+
+      return article
+    } finally {
+      loadingDetalle.value[id] = false
     }
   }
 
@@ -122,6 +150,7 @@ export const useArticulosStore = defineStore('articulos', () => {
     loading,
 
     // Estado de detalle
+    articulos,
     articuloActual,
     loadingDetalle,
 
@@ -136,6 +165,7 @@ export const useArticulosStore = defineStore('articulos', () => {
     // Acciones
     fetchArticulos,
     fetchArticuloById,
+    fetchArticuloGroupById,
     fetchArbolCostos,
     fetchListaMaestra,
 

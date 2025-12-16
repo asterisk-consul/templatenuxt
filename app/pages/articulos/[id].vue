@@ -25,15 +25,19 @@ onMounted(async () => {
 <template>
   <UDashboardPanel id="articulos">
     <template #header>
-      <UDashboardNavbar :title="'Articulos/' + articulosStore.articuloActual?.nombre == null ? '' : articulosStore.articuloActual?.nombre">
+      <UDashboardNavbar
+        :title="
+          'Articulos/' + articulosStore.articuloActual?.nombre == null
+            ? ''
+            : articulosStore.articuloActual?.nombre
+        "
+      >
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
       </UDashboardNavbar>
       <UDashboardToolbar class="flex items-center justify-between mb-4">
-        <UButton color="primary" @click="router.back()">
-          Volver
-        </UButton>
+        <UButton color="primary" @click="router.back()">Volver</UButton>
         <h1 class="text-2xl font-semibold">
           {{ articulosStore.articuloActual?.nombre }}
         </h1>

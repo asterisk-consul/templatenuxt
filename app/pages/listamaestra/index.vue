@@ -1,11 +1,13 @@
-<script setup>
-import ListaMaestra from '~/components/articulos/ListaMaestra/ListaMaestra.vue'
+<script setup lang="ts">
+import CardListas from '~/components/articulos/ListaMaestra/CardListas.vue'
+
+const id = [1118, 1939]
 </script>
 
 <template>
   <UDashboardPanel id="listamaestra">
     <template #header>
-      <UDashboardNavbar title="Listado de Artículos" :ui="{ right: 'gap-3' }">
+      <UDashboardNavbar title="Listas Maestras" :ui="{ right: 'gap-3' }">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
@@ -13,7 +15,9 @@ import ListaMaestra from '~/components/articulos/ListaMaestra/ListaMaestra.vue'
     </template>
 
     <template #body>
-      <ListaMaestra :id="1118" />
+      <div class="grid grid-cols-2 gap-4">
+        <CardListas v-for="itemId in id" :key="itemId" :id="itemId" />
+      </div>
     </template>
   </UDashboardPanel>
 </template>
