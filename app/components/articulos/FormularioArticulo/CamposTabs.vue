@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import TabsCompuestos from '~/components/articulos/FormularioArticulo/tabs/TabsCompuestos.vue'
-import { tabsItems } from '~/components/articulos/FormularioArticulo/tabs/itemsTabs/items'
+import { tabsItems } from '~/components/articulos/FormularioArticulo/tabs/items'
+import TabsCompuestos from '~/components/articulos/FormularioArticulo/tabs/Compuestos/TabsCompuestos.vue'
 import TabsPrecios from '~/components/articulos/FormularioArticulo/tabs/Precios/TabsPrecios.vue'
-
-import LockedInput from '~/components/articulos/FormularioArticulo/ui/LocketInput.vue'
 
 interface Props {
   form: any
@@ -20,7 +18,7 @@ defineProps<Props>()
     </template>
 
     <template #compuestos>
-      <TabsCompuestos :form="form" :disabled="disabled" />
+      <TabsCompuestos :form="form" :disabled="disabled" :id="form.id" />
     </template>
 
     <template #precios>
@@ -33,6 +31,9 @@ defineProps<Props>()
 
     <template #especificaciones>
       <span>Especificaciones</span>
+    </template>
+    <template #centros>
+      <span>Centros de costo</span>
     </template>
   </UTabs>
 </template>

@@ -27,15 +27,6 @@ declare global {
     tipos: Tipo[]
   }
 
-  export interface Articuloprecio {
-    articuloid: number
-    categid: number
-    changedate: string
-    factorconversion: number
-    id: number
-    precio: number
-  }
-
   interface Categoria {
     id: number
     name: string
@@ -52,6 +43,23 @@ declare global {
     grupo: string
     id: number
     name: string
+  }
+
+  interface Articuloprecio {
+    articuloid: number
+    categid: number
+    changedate: string
+    factorconversion: number
+    id: number
+    precio: number
+  }
+  interface ArticuloprecioForm {
+    id?: number
+    articuloid?: number
+    categid: string | undefined
+    precio: number
+    factorconversion: number
+    changedate: string
   }
 
   interface ArticulosDeposito {

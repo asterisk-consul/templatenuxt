@@ -18,6 +18,19 @@ export function useCategorias() {
   function resolveNombre(id?: string | null): string {
     return id ? (byId.value[id]?.name ?? '-') : '-'
   }
+  function resolvePath(id?: string): string {
+    if (!id) return '-'
+
+    const parts: string[] = []
+    let current = byId.value[id]
+
+    while (current) {
+      parts.unshift(current.name)
+      current = current.parentid ? byId.value[current.parentid] : undefined
+    }
+
+    return parts.join(' → ')
+  }
 
   const selectOptions = computed(() =>
     entities.value.map((c) => ({
@@ -35,6 +48,7 @@ export function useCategorias() {
     load,
     selectOptions,
     resolveNombre,
+    resolvePath,
     findById
   }
 }

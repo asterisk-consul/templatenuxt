@@ -8,10 +8,10 @@ export const CategoriasService = {
     })
   },
 
-  findByGrupos(grupos: string[]): Promise<Categoria[]> {
+  findByGrupos(grupo: string[]): Promise<Categoria[]> {
     return apiFetch<Categoria[]>('/api/categorias', {
       api: 'api2',
-      query: { grupos }
+      query: { grupo }
     })
   },
 

@@ -1,22 +1,24 @@
 <script setup lang="ts">
 import { reactive, watch, computed } from 'vue'
+import CategoriaSelect from '@/components/categorias/CategoraisSelect.vue'
 
 interface Props {
-  modelValue: Articuloprecio | null
+  open: boolean
+  modelValue: ArticuloprecioForm | null
 }
 
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
-  (e: 'save', value: Articuloprecio): void
+  (e: 'save', value: ArticuloprecioForm): void
   (e: 'cancel'): void
 }>()
 
 // Estado interno editable
-const form = reactive<Articuloprecio>({
-  id: 0,
-  articuloid: 0,
-  categid: 0,
+const form = reactive<ArticuloprecioForm>({
+  id: undefined,
+  articuloid: undefined,
+  categid: undefined, // ← CLAVE
   precio: 0,
   factorconversion: 1,
   changedate: new Date().toISOString()
@@ -27,13 +29,19 @@ watch(
   () => props.modelValue,
   (value) => {
     if (value) {
-      Object.assign(form, structuredClone(value))
-    } else {
-      // crear nuevo
       Object.assign(form, {
-        id: 0,
-        articuloid: 0,
-        categid: 0,
+        id: value.id,
+        articuloid: value.articuloid,
+        categid: value.categid,
+        precio: value.precio,
+        factorconversion: value.factorconversion,
+        changedate: value.changedate
+      })
+    } else {
+      Object.assign(form, {
+        id: undefined,
+        articuloid: undefined,
+        categid: undefined,
         precio: 0,
         factorconversion: 1,
         changedate: new Date().toISOString()
@@ -47,34 +55,41 @@ const isEdit = computed(() => !!props.modelValue)
 </script>
 
 <template>
-  <UCard>
+  <UModal v-model:open="props.open" @update:open="emit('cancel')">
     <template #header>
       <h3 class="text-lg font-semibold">
         {{ isEdit ? 'Editar precio' : 'Nuevo precio' }}
       </h3>
     </template>
+    <template #body>
+      <UCard>
+        <UForm @submit.prevent="emit('save', form)">
+          <div class="space-y-4">
+            <div class="flex flex-col gap-2">
+              <span class="text-sm font-medium">Categoría</span>
 
-    <UForm @submit.prevent="emit('save', form)">
-      <div class="space-y-4">
-        <UInput
-          v-model.number="form.precio"
-          type="number"
-          label="Precio"
-        />
+              <CategoriaSelect
+                v-model="form.categid"
+                :grupos="['tipoprecio']"
+              />
+            </div>
 
-        <UInput
-          v-model.number="form.factorconversion"
-          type="number"
-          label="Factor de conversión"
-        />
-      </div>
+            <div class="flex flex-col gap-2">
+              <span class="text-sm font-medium">Precio</span>
+              <UInput v-model.number="form.precio" type="number" />
+            </div>
 
+            <div class="flex flex-col gap-2">
+              <span class="text-sm font-medium">Factor de conversión</span>
+              <UInput v-model.number="form.factorconversion" type="number" />
+            </div>
+          </div>
+        </UForm>
+      </UCard>
+    </template>
+    <template #footer>
       <div class="flex justify-end gap-2 mt-6">
-        <UButton
-          variant="ghost"
-          color="neutral"
-          @click="emit('cancel')"
-        >
+        <UButton variant="ghost" color="neutral" @click="emit('cancel')">
           Cancelar
         </UButton>
 
@@ -82,6 +97,6 @@ const isEdit = computed(() => !!props.modelValue)
           {{ isEdit ? 'Guardar cambios' : 'Crear' }}
         </UButton>
       </div>
-    </UForm>
-  </UCard>
+    </template>
+  </UModal>
 </template>

@@ -23,5 +23,10 @@ export const tabsItems = [
     label: 'Proveedores',
     icon: 'i-lucide-factory',
     slot: 'proveedores'
+  },
+  {
+    label: 'Centros de costo',
+    icon: 'i-lucide-briefcase',
+    slot: 'centros'
   }
 ]

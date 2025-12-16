@@ -1,6 +1,7 @@
 <script setup>
 import ListaMaestra from '~/components/articulos/ListaMaestra.vue'
-const data = await fetchData('/articulos/compuestos/1118', { api: 'api2' })
+const data = await fetchData('/api/articulos/compuestos/1118', { api: 'api2' })
+console.log(data)
 </script>
 
 <template>

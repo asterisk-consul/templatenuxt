@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import LockedInput from '~/components/articulos/FormularioArticulo/ui/LocketInput.vue'
+import CategoriaSelect from '~/components/categorias/CategoraisSelect.vue'
 
 interface Props {
   form: any
@@ -27,7 +28,12 @@ defineProps<Props>()
   </LockedInput>
 
   <LockedInput :disabled="disabled" label="Categoría">
-    <UInput v-model="form.categid" class="w-full" />
+    <CategoriaSelect
+      v-model="form.categid"
+      class="w-full"
+      :grupos="['articulos']"
+      showPath
+    />
   </LockedInput>
 
   <LockedInput :disabled="disabled" label="Descripción" class="md:col-span-2">
