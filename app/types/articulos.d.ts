@@ -97,9 +97,22 @@ declare global {
     costoTotal: number
     hijos: ArbolCostosNodo[]
   }
+  export type NodoArbol = {
+    id: string | number
+    internalcode: string | null
+    externalcode: string | null
+    nombre: string
+    cantidad: number
+    ancho?: number | null
+    largo?: number | null
+    articulo?: any
+    hijos: NodoArbol[]
+    depth?: number
+    parentId?: string | number | null
+  }
 
   type NodoListaMaestra = {
-    id: bigint
+    id: string
     nombre: string
     internalcode: string | null
     externalcode: string | null
@@ -114,12 +127,10 @@ declare global {
       cantidad: number
       deposito: string
     }[]
-
     categorias?: {
       id: bigint
       name: string
     }[]
-
     hijos: NodoListaMaestra[]
   }
 }

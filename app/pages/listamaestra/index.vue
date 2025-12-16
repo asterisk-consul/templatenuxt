@@ -1,7 +1,5 @@
 <script setup>
-import ListaMaestra from '~/components/articulos/ListaMaestra.vue'
-const data = await fetchData('/api/articulos/compuestos/1118', { api: 'api2' })
-console.log(data)
+import ListaMaestra from '~/components/articulos/ListaMaestra/ListaMaestra.vue'
 </script>
 
 <template>
@@ -15,7 +13,7 @@ console.log(data)
     </template>
 
     <template #body>
-      <ListaMaestra :data="data" />
+      <ListaMaestra :id="1118" />
     </template>
   </UDashboardPanel>
 </template>

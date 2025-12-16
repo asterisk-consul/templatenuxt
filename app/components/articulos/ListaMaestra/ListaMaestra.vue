@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, watch, h, resolveComponent } from 'vue'
+import { ref, watch, h, resolveComponent, onMounted } from 'vue'
 import type { CellContext } from '@tanstack/vue-table'
-const UCheckbox = resolveComponent('UCheckbox')
-const UBadge = resolveComponent('UBadge')
 import type { TableColumn } from '@nuxt/ui'
 import { VueDraggableNext as draggable } from 'vue-draggable-next'
+
+const UCheckbox = resolveComponent('UCheckbox')
+const UBadge = resolveComponent('UBadge')
 
 // ==========================================================
 // Tipos
@@ -27,7 +28,11 @@ type NodoArbol = {
 // ==========================================================
 // Props
 // ==========================================================
-const props = defineProps<{ data: NodoArbol }>()
+const props = defineProps<{ id: number }>()
+
+// Importar store
+import { useArticulosStore } from '~/stores/UseArticulosStores'
+const articulosStore = useArticulosStore()
 
 // ==========================================================
 // Estados
@@ -38,6 +43,13 @@ const rowSelection = ref<Record<string, boolean>>({})
 const table = useTemplateRef('table')
 
 // ==========================================================
+// Helpers
+// ==========================================================
+function esTerminal(code?: string | null) {
+  return !!code && code.trim().startsWith('T')
+}
+
+// ==========================================================
 // Flatten tree
 // ==========================================================
 function flatten(
@@ -45,11 +57,11 @@ function flatten(
   depth = 0,
   parentId: string | number | null = null
 ) {
-  const copy = { ...node, depth, parentId }
+  const copy = { ...node, depth, parentId, hijos: node.hijos ?? [] }
   flatData.value.push(copy)
 
   if (expanded.value.has(node.id)) {
-    for (const child of node.hijos) {
+    for (const child of copy.hijos) {
       flatten(child, depth + 1, node.id)
     }
   }
@@ -57,13 +69,18 @@ function flatten(
 
 function rebuild() {
   flatData.value = []
-  flatten(props.data)
+  articulosStore.listaMaestra.forEach((node) => flatten(node))
+
+  // Inicializar rowSelection
+  flatData.value.forEach((item) => {
+    if (!(item.id in rowSelection.value)) {
+      rowSelection.value[item.id] = false
+    }
+  })
 }
 
-rebuild()
-
 watch(expanded, rebuild, { deep: true })
-watch(() => props.data, rebuild, { deep: true })
+watch(() => articulosStore.listaMaestra, rebuild, { deep: true })
 
 // ==========================================================
 // Toggle
@@ -77,23 +94,14 @@ function toggle(id: string | number) {
 }
 
 // ==========================================================
-// Helpers
-// ==========================================================
-function esTerminal(code: string | null | undefined) {
-  return !!code && code.trim().startsWith('T')
-}
-
-// ==========================================================
 // Drag & Drop
 // ==========================================================
 function onMove(evt: any) {
   const dragged = evt.draggedContext.element
   const target = evt.relatedContext.element
 
-  // No mover raíz
   if (!dragged.parentId) return false
 
-  // No permitir mover dentro de sí mismo
   let current = target
   while (current) {
     if (current.id === dragged.id) return false
@@ -113,17 +121,17 @@ function onDragChange(evt: any) {
 // Columnas
 // ==========================================================
 const columns: TableColumn<NodoArbol, unknown>[] = [
-  // Selección de fila
   {
-    id: 'select',
-    header: ({ table }) =>
+    accessorKey: 'select',
+    header: () =>
       h(UCheckbox, {
-        modelValue: Object.values(rowSelection.value).some(Boolean)
-          ? 'indeterminate'
-          : Object.values(rowSelection.value).every(Boolean),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') => {
+        modelValue: Object.values(rowSelection.value).every(Boolean),
+        indeterminate:
+          Object.values(rowSelection.value).some(Boolean) &&
+          !Object.values(rowSelection.value).every(Boolean),
+        'onUpdate:modelValue': (value: boolean) => {
           flatData.value.forEach((item) => {
-            rowSelection.value[item.id] = !!value
+            rowSelection.value[item.id] = value
           })
         },
         'aria-label': 'Select all'
@@ -137,8 +145,6 @@ const columns: TableColumn<NodoArbol, unknown>[] = [
         'aria-label': 'Select row'
       })
   },
-
-  // Nombre con drag handle y expand/collapse
   {
     accessorKey: 'nombre',
     header: 'Artículo',
@@ -159,14 +165,11 @@ const columns: TableColumn<NodoArbol, unknown>[] = [
             item.parentId !== null
               ? h(
                   'span',
-                  {
-                    class: 'mr-2 cursor-move text-gray-400 select-none',
-                    style: { visibility: item.parentId ? 'visible' : 'hidden' }
-                  },
+                  { class: 'mr-2 cursor-move text-gray-400 select-none' },
                   '⋮⋮'
                 )
               : null,
-            item.hijos.length > 0
+            item.hijos?.length
               ? h(
                   'button',
                   {
@@ -183,7 +186,7 @@ const columns: TableColumn<NodoArbol, unknown>[] = [
                           expanded.value.has(item.id) ? 'rotate-90' : 'rotate-0'
                         ]
                       },
-                      '>' // este carácter se "rota"
+                      '>'
                     )
                   ]
                 )
@@ -229,7 +232,6 @@ const columns: TableColumn<NodoArbol, unknown>[] = [
       )
     }
   },
-
   { accessorKey: 'internalcode', header: 'Código interno' },
   { accessorKey: 'externalcode', header: 'Código externo' },
   { accessorKey: 'cantidad', header: 'Cantidad' },
@@ -263,6 +265,14 @@ function editar(item: NodoArbol) {
 function eliminar(item: NodoArbol) {
   console.log('Eliminar', item)
 }
+
+// ==========================================================
+// Mounted
+// ==========================================================
+onMounted(async () => {
+  await articulosStore.fetchListaMaestra(String(props.id))
+  rebuild()
+})
 </script>
 
 <template>
@@ -283,7 +293,7 @@ function eliminar(item: NodoArbol) {
               <div class="flex items-center">
                 <span :style="{ width: `${row.depth! * 1.5}rem` }"></span>
                 <span v-if="row.parentId" class="cursor-move">⋮⋮</span>
-                <button v-if="row.hijos.length" @click="toggle(row.id)">
+                <button v-if="row.hijos?.length" @click="toggle(row.id)">
                   {{ expanded.has(row.id) ? '-' : '+' }}
                 </button>
                 <span>{{ row.nombre }}</span>
@@ -299,8 +309,7 @@ function eliminar(item: NodoArbol) {
   </UTable>
 
   <div class="px-4 py-3.5 border-t border-accented text-sm text-muted">
-    {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }} of
-    {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s)
-    selected.
+    {{ Object.values(rowSelection).filter(Boolean).length }} of
+    {{ flatData.length }} row(s) selected.
   </div>
 </template>

@@ -1,4 +1,5 @@
 import { fetchData } from '@/composables/apiService'
+import { adaptListaMaestra } from '@/adapters/listaMaestra.adapter'
 import { ArticuloEditSchema } from '@/schemas/ArticuloApiSchema'
 
 export const ArticulosService = {
@@ -25,14 +26,15 @@ export const ArticulosService = {
     const parsed = ArticuloEditSchema.safeParse(data.value)
     return parsed.success ? data.value : null
   },
-  async apiGetListaMaestra(id: number) {
+  async apiGetListaMaestra(id: string) {
     const data: DataApi = await fetchData(`/api/articulos/compuestos/${id}`, {
       api: 'api2'
     })
 
     const parsed = ArticuloEditSchema.safeParse(data.value)
-    return parsed.success ? data.value : null
+    return parsed.success ? adaptListaMaestra(data.value) : null
   }
+
   // async create(data: Partial<Articulo>): Promise<Articulo> {
   //   const res = await fetch(`/articulos`, {
   //     method: 'POST',
