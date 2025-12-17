@@ -124,7 +124,10 @@ export const useArticulosStore = defineStore('articulos', () => {
   const esArticuloCompuesto = computed(() => {
     return tieneHijos.value || tienePadres.value // Verifica si es un artículo compuesto
   })
-
+  const getArticuloNombre = (id: string) => {
+    const art = articulosStore.articulos.find((a) => a.id === id)
+    return art ? art.nombre : 'Artículo no encontrado'
+  }
   // ============================================
   // RESET FUNCTIONS (Función de reset)
   // ============================================

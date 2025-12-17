@@ -16,7 +16,7 @@ watch(
 )
 
 onMounted(async () => {
-  await articulosStore.fetchArticuloById(id)
+  await articulosStore.fetchArticuloById(String(id))
 })
 </script>
 
@@ -30,7 +30,8 @@ onMounted(async () => {
       </UDashboardNavbar>
       <UDashboardToolbar class="flex items-center justify-between mb-4">
         <UButton color="primary" @click="router.back()">Volver</UButton>
-        <h1 class="text-2xl font-semibold">
+        <USkeleton v-if="loading" class="h-4 w-[250px]" />
+        <h1 v-else class="text-2xl font-semibold">
           {{ articulosStore.articuloActual?.nombre }}
         </h1>
       </UDashboardToolbar>
@@ -46,7 +47,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-      <ListaMaestra v-else :id="id" />
+      <ListaMaestra v-else :id="Number(id)" />
     </template>
   </UDashboardPanel>
 </template>
