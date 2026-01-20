@@ -1,48 +1,43 @@
-# ==== Etapa de Construcción (Build Stage) ====
+# ==== Build ====
 FROM node:20-alpine AS builder
-
-# Crear directorio de trabajo
 WORKDIR /app
 
-# Instalar pnpm globalmente
 RUN npm install -g pnpm
 
-# Copiar package.json y lockfile
-COPY package.json pnpm-lock.yaml ./
+# Build-time args (desde Dokploy)
+ARG API_BASE1
+ARG PUBLIC_API_BASE1
+ARG API_BASE2
+ARG PUBLIC_API_BASE2
 
-# Instalar todas las dependencias (prod + dev) necesarias para el build
+# Exportarlos al entorno del build (Nuxt los lee acá)
+ENV API_BASE1=$API_BASE1
+ENV PUBLIC_API_BASE1=$PUBLIC_API_BASE1
+ENV API_BASE2=$API_BASE2
+ENV PUBLIC_API_BASE2=$PUBLIC_API_BASE2
+
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-# Copiar el resto del código fuente
 COPY . .
-
-# Construir la aplicación Nuxt (genera .output)
 RUN pnpm run build
 
-# ==== Etapa de Producción (Production Stage) ====
-FROM node:20-alpine AS runner
 
+# ==== Runtime ====
+FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Instalar pnpm globalmente
 RUN npm install -g pnpm
 
-# Copiar los archivos esenciales del builder
 COPY --from=builder /app/.output ./.output
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/pnpm-lock.yaml ./
 
-# Instalar solo dependencias de producción
 RUN pnpm install --prod --frozen-lockfile
 
-# Variables de entorno
 ENV NODE_ENV=production
 ENV NUXT_HOST=0.0.0.0
 ENV NUXT_PORT=3000
 
-
-# Exponer puerto (Dockloid lo reescribirá con la variable PORT)
 EXPOSE 3000
-
-# Comando para iniciar la app en producción
 CMD ["pnpm", "start"]
