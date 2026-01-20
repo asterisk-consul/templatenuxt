@@ -11,7 +11,7 @@ export const ArticulosService = {
     return value
   },
   async apiGetArticuloById(id: string) {
-    const data: DataApi = await fetchData(`/api/articulos/${id}`, {
+    const data: DataApi = await fetchData(`/articulos/${id}`, {
       api: 'api2'
     })
 
@@ -19,7 +19,7 @@ export const ArticulosService = {
     return parsed.success ? data.value : null
   },
   async apiGetArticuloBom(id: number) {
-    const data: DataApi = await fetchData(`/api/articulos/bom/${id}`, {
+    const data: DataApi = await fetchData(`/articulos/bom/${id}`, {
       api: 'api2'
     })
 
@@ -27,7 +27,7 @@ export const ArticulosService = {
     return parsed.success ? data.value : null
   },
   async apiGetListaMaestra(id: string) {
-    const data: DataApi = await fetchData(`/api/articulos/compuestos/${id}`, {
+    const data: DataApi = await fetchData(`/articulos/compuestos/${id}`, {
       api: 'api2'
     })
 
