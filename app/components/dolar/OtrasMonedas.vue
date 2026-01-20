@@ -2,7 +2,9 @@
 import DollarCard from '@/components/dolar/DolarCard.vue'
 import DollarCardPequeña from '@/components/dolar/DolarCardPequeña.vue'
 
-const { data, pending, error } = await useFetch('/api/cotizaciones')
+const { data, pending, error } = await useFetch(
+  'https://dolarapi.com/v1/cotizaciones'
+)
 
 const dolar = computed(() => (data.value as ApiDolar[]) || [])
 const resto = computed(() =>
