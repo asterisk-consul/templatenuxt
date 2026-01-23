@@ -60,14 +60,6 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-07-11',
   // ← Esto lo hace SPA
   nitro: {
-    preset: 'static' // Para generar archivos estáticos
-  },
-  eslint: {
-    config: {
-      stylistic: {
-        commaDangle: 'never',
-        braceStyle: '1tbs'
-      }
-    }
+    preset: 'node' // Para generar archivos estáticos
   }
 })

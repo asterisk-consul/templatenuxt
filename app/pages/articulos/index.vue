@@ -1,5 +1,20 @@
 <script setup lang="ts">
-import TablaArticulos from '@/components/articulos/TablaArticulos.vue'
+const page = ref(1)
+const limit = ref(25)
+const { data, pending, error, refresh } = await useFetch(
+  '/api/articulostable',
+  {
+    query: {
+      page,
+      limit,
+      expand: 'columns'
+    }
+  }
+)
+
+onMounted(() => {
+  console.log(data.value)
+})
 </script>
 
 <template>
@@ -13,7 +28,14 @@ import TablaArticulos from '@/components/articulos/TablaArticulos.vue'
     </template>
 
     <template #body>
-      <TablaArticulos />
+      <TablasTableAsterisk
+        v-if="data"
+        table-key="articulos"
+        :rows="data.rows"
+        :columns="data.columns"
+        :meta="data.meta"
+        :loading="pending"
+      />
     </template>
   </UDashboardPanel>
 </template>
