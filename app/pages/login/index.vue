@@ -1,68 +1,37 @@
 <script setup lang="ts">
-import * as z from 'zod'
-import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui'
+import type { FormSubmitEvent } from '@nuxt/ui'
+import { useAuthStore } from '@/stores/auth.store'
+import { schema } from './schema/login.schema'
+import type { Schema } from './schema/login.schema'
+import { fields } from './fields'
+
+definePageMeta({
+  auth: false
+})
 
 const router = useRouter()
 const toast = useToast()
+const auth = useAuthStore()
 
-const fields: AuthFormField[] = [
-  {
-    name: 'username', // <-- cambió de email a username
-    type: 'text', // ya no es email
-    label: 'Usuario',
-    placeholder: 'Ingresa tu usuario',
-    required: true
-  },
-  {
-    name: 'password',
-    label: 'Password',
-    type: 'password',
-    placeholder: 'Ingresa tu contraseña',
-    required: true
-  },
-  {
-    name: 'remember',
-    label: 'Recordarme',
-    type: 'checkbox'
-  }
-]
-const schema = z.object({
-  username: z.string({
-    required_error: 'Username requerido'
-  }).min(3, 'Mínimo 3 caracteres'),
-
-  password: z.string({
-    required_error: 'Password requerido'
-  }).min(4, 'Mínimo 4 caracteres')
-});
-
-
-type Schema = z.output<typeof schema>
-
-// Estado del error dinámico
 const errorMessage = ref('')
 const showError = ref(false)
 
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
-  const auth = useAuthStore()
-
   try {
-    // Llamada al login asíncrono
-    await auth.login(payload.data.username, payload.data.password)
-
-    // Si llegó acá, login exitoso
     showError.value = false
 
+    await auth.login(payload.data.username, payload.data.password)
+
     toast.add({
-      title: 'Ingreso Exitoso',
+      title: 'Ingreso exitoso',
       description: `Bienvenido ${payload.data.username}`,
       color: 'success'
     })
+
     router.push('/')
-  } catch (err: unknown) {
-    // Manejar errores dinámicos
+  } catch (err: any) {
     errorMessage.value =
-      err instanceof Error ? err.message : 'Error desconocido'
+      err?.data?.message || 'Usuario o contraseña incorrectos'
     showError.value = true
   }
 }

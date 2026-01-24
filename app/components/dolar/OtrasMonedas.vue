@@ -9,7 +9,6 @@ const resto = computed(() =>
   dolar.value.filter((d) => d.moneda.toUpperCase() !== 'USD')
 )
 
-// Fecha de actualización (toma la primera cotización)
 const fechaActualizacion = computed(() =>
   dolar.value.length ? dolar.value[0]?.fechaActualizacion : null
 )

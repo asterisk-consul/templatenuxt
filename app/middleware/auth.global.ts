@@ -1,10 +1,24 @@
-export default defineNuxtRouteMiddleware(() => {
+export default defineNuxtRouteMiddleware(async (to) => {
+  // 1. Rutas públicas
+  const publicPages = ['/login']
+  if (publicPages.includes(to.path)) {
+    return
+  }
+
   const auth = useAuthStore()
 
-  // Previene error si el store no está listo
-  if (!auth || !auth.user) return
+  // 2. Si ya hay usuario, no hacer nada
+  if (auth.user) return
 
-  const user = auth.user
+  try {
+    // 3. Intentar restaurar sesión desde cookies
+    await auth.fetchMe()
+  } catch {
+    // ignorar error
+  }
 
-  if (!user) return navigateTo('/login')
+  // 4. Si sigue sin usuario → login
+  if (!auth.user) {
+    return navigateTo('/login')
+  }
 })

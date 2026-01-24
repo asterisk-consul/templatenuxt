@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/stores/useAuthStore'
+import { useAuthStore } from '~/stores/auth.store'
 
 export function useImportArticulos() {
   const progress = ref(0)

@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   ],
   devServer: {
     host: '0.0.0.0', // <- debe estar así
-    port: 3000
+    port: 3008
   },
   experimental: {
     watcher: 'chokidar',
@@ -16,7 +16,7 @@ export default defineNuxtConfig({
   typescript: {
     typeCheck: false // Desactivar temporalmente durante build
   },
-  ssr: false,
+  ssr: true,
   imports: {
     dirs: [
       'composables',
@@ -30,8 +30,8 @@ export default defineNuxtConfig({
     enabled: true
   },
   app: {
-    baseURL: '/', // Ajusta si está en subdirectorio
-    buildAssetsDir: 'assets'
+    baseURL: './', // Relative paths for filesystem routing in Capacitor
+    buildAssetsDir: '/_nuxt/'
   },
 
   css: ['~/assets/css/main.css'],
