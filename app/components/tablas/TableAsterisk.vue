@@ -15,9 +15,17 @@ const props = defineProps<{
 
 const { data, visibleColumns, toggleColumn, reorderColumns } = useDataTable(
   props.tableKey,
-  props.rows,
-  props.columns
+  toRef(props, 'rows'),
+  toRef(props, 'columns')
 )
+
+const emit = defineEmits<{
+  (e: 'page-change', page: number): void
+}>()
+
+const onPageChange = (page: number) => {
+  emit('page-change', page)
+}
 </script>
 
 <template>
@@ -26,6 +34,6 @@ const { data, visibleColumns, toggleColumn, reorderColumns } = useDataTable(
 
     <UTable :data="data" :columns="visibleColumns" sticky />
 
-    <DataTablePagination :meta="meta" />
+    <DataTablePagination :meta="meta" @page-change="onPageChange" />
   </div>
 </template>

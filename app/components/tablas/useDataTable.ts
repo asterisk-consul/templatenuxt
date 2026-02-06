@@ -1,19 +1,37 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, type Ref } from 'vue'
 import { adaptColumns } from './ColumnAdapter'
 import type { DataTableColumn } from './types'
 
 export function useDataTable(
   tableKey: string,
-  rows: any[],
-  backendColumns: DataTableColumn[]
+  rows: Ref<any[] | undefined>,
+  backendColumns: Ref<DataTableColumn[] | undefined>
 ) {
-  const data = ref([...rows])
-  const allColumns = ref(adaptColumns(backendColumns))
+  const data = ref<any[]>([])
+  const allColumns = ref<DataTableColumn[]>([])
 
   watch(
-    () => rows,
-    (r) => (data.value = [...r]),
-    { deep: true }
+    rows,
+    (r) => {
+      if (Array.isArray(r)) {
+        data.value = [...r]
+      } else {
+        data.value = []
+      }
+    },
+    { immediate: true }
+  )
+
+  watch(
+    backendColumns,
+    (cols) => {
+      if (Array.isArray(cols)) {
+        allColumns.value = adaptColumns(cols)
+      } else {
+        allColumns.value = []
+      }
+    },
+    { immediate: true }
   )
 
   const visibleColumns = computed(() =>
@@ -32,7 +50,6 @@ export function useDataTable(
     if (from === to) return
 
     const cols = [...allColumns.value]
-
     const moved = cols[from]
     if (!moved) return
 

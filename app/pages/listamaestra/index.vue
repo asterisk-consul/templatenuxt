@@ -16,7 +16,7 @@ const id = [1118, 1939]
 
     <template #body>
       <div class="grid grid-cols-2 gap-4">
-        <CardListas v-for="itemId in id" :key="itemId" :id="itemId" />
+        <!-- <CardListas v-for="itemId in id" :key="itemId" :id="itemId" /> -->
       </div>
     </template>
   </UDashboardPanel>

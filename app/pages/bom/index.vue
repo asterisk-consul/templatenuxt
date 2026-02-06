@@ -1,7 +1,15 @@
 <script setup>
 import ArbolCostosTable from '~/components/articulos/ArbolCostosBom.vue'
-const data = await fetchData('/articulos/arbol-costos/1118', {
-  api: 'api2'
+const { data, error, pending, refresh } = await useFetch(
+  '/api/articulos/arbolcostos',
+  {
+    baseURL: '/',
+    server: true
+  }
+)
+
+useSeoMeta({
+  title: 'Árbol de Costos'
 })
 </script>
 

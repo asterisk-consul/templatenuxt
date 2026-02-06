@@ -10,6 +10,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'page-change', page: number): void
 }>()
+onMounted(() => {
+  console.log(props.meta)
+})
 </script>
 
 <template>
@@ -18,6 +21,7 @@ const emit = defineEmits<{
       :page="meta.page"
       :items-per-page="meta.limit"
       :total="meta.total"
+      :sibling-count="1"
       @update:page="emit('page-change', $event)"
     />
   </div>

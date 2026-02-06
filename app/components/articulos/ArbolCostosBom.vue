@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import { h, ref, watch } from 'vue'
+import { h, ref, watch, onMounted } from 'vue'
 
 // ==========================================================
-// Tipos que coinciden con tu backend
+// Tipos
 // ==========================================================
 type NodoArbol = {
   id: string | number
@@ -17,58 +17,69 @@ type NodoArbol = {
 }
 
 // ==========================================================
-// Prop recibido desde el padre
+// Props (SSR-safe)
 // ==========================================================
 const props = defineProps<{
-  data: NodoArbol
+  data?: NodoArbol
 }>()
 
 // ==========================================================
-// Estados internos
+// State
 // ==========================================================
 const flatData = ref<NodoArbol[]>([])
 
-// IMPORTANTE: reemplazamos el Set para que Vue detecte cambios
+// Usamos Set pero recreándolo para mantener reactividad
 const expanded = ref<Set<string | number>>(new Set())
 
 // ==========================================================
-// Aplanar árbol
+// Flatten tree (seguro para SSR)
 // ==========================================================
 function flatten(
-  node: NodoArbol,
+  node: NodoArbol | undefined,
   depth = 0,
   parentId: string | number | null = null
 ) {
-  const copy = { ...node, depth, parentId }
+  if (!node) return
+
+  const copy: NodoArbol = {
+    ...node,
+    depth,
+    parentId
+  }
+
   flatData.value.push(copy)
 
-  if (expanded.value.has(node.id)) {
-    for (const h of node.hijos) {
-      flatten(h, depth + 1, node.id)
+  if (expanded.value.has(node.id) && Array.isArray(node.hijos)) {
+    for (const child of node.hijos) {
+      flatten(child, depth + 1, node.id)
     }
   }
 }
 
 function rebuildFlatData() {
   flatData.value = []
+
+  if (!props.data) return
+
   flatten(props.data)
 }
 
-// Construir por primera vez
-rebuildFlatData()
+// ==========================================================
+// Watchers
+// ==========================================================
 
-// Watch para expandir/colapsar
-watch(expanded, () => rebuildFlatData(), { deep: true })
-
-// Watch por si cambia el árbol completo
+// Cuando llega data (async / SSR)
 watch(
   () => props.data,
   () => rebuildFlatData(),
-  { deep: true }
+  { immediate: true, deep: true }
 )
 
+// Expand / collapse
+watch(expanded, () => rebuildFlatData(), { deep: true })
+
 // ==========================================================
-// Toggle expand/collapse
+// Toggle
 // ==========================================================
 function toggle(id: string | number) {
   if (expanded.value.has(id)) {
@@ -79,7 +90,7 @@ function toggle(id: string | number) {
 }
 
 // ==========================================================
-// Columnas
+// Columns
 // ==========================================================
 const columns: TableColumn<NodoArbol>[] = [
   {
@@ -89,26 +100,26 @@ const columns: TableColumn<NodoArbol>[] = [
       const item = row.original
 
       return h('div', { class: 'flex items-center' }, [
-        // Sangría
+        // Indentación
         h('span', {
-          style: { width: `calc(${item.depth} * 1rem)` },
-          class: 'inline-block'
+          class: 'inline-block',
+          style: { width: `${(item.depth ?? 0) * 1}rem` }
         }),
 
-        // Botón expandir/colapsar
-        item.hijos.length > 0
+        // Botón expandir
+        item.hijos?.length
           ? h(
               'button',
               {
-                class: 'mr-2 text-sm px-1 border rounded',
+                class: 'mr-2 text-sm px-1 border rounded hover:bg-gray-100',
                 onClick: () => toggle(item.id)
               },
-              expanded.value.has(item.id) ? '-' : '+'
+              expanded.value.has(item.id) ? '−' : '+'
             )
           : h('span', { class: 'mr-4' }),
 
         // Nombre
-        h('span', {}, item.nombre)
+        h('span', item.nombre)
       ])
     }
   },
@@ -119,30 +130,31 @@ const columns: TableColumn<NodoArbol>[] = [
   {
     accessorKey: 'precioUnitario',
     header: 'Precio unitario',
-    cell: ({ row }) => {
-      const price = Number(row.original.precioUnitario)
-      return new Intl.NumberFormat('es-AR', {
+    cell: ({ row }) =>
+      new Intl.NumberFormat('es-AR', {
         style: 'currency',
         currency: 'USD'
-      }).format(price)
-    }
+      }).format(Number(row.original.precioUnitario))
   },
   {
     accessorKey: 'costoTotal',
     header: 'Costo total',
-    cell: ({ row }) => {
-      const total = Number(row.original.costoTotal)
-      return h(
+    cell: ({ row }) =>
+      h(
         'div',
         { class: 'text-right font-medium' },
         new Intl.NumberFormat('es-AR', {
           style: 'currency',
           currency: 'USD'
-        }).format(total)
+        }).format(Number(row.original.costoTotal))
       )
-    }
   }
 ]
+
+// Debug opcional
+onMounted(() => {
+  console.log('Árbol recibido:', props.data)
+})
 </script>
 
 <template>

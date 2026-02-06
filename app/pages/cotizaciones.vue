@@ -1,4 +1,10 @@
 <script setup lang="ts">
+definePageMeta({
+  auth: true
+})
+useSeoMeta({
+  title: 'Cotizaciones'
+})
 import CotizacionDolar from '@/components/dolar/CotizacionDolar.vue'
 import OtrasMonedas from '@/components/dolar/OtrasMonedas.vue'
 const items = [

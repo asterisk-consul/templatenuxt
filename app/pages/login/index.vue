@@ -6,6 +6,7 @@ import type { Schema } from './schema/login.schema'
 import { fields } from './fields'
 
 definePageMeta({
+  layout: 'public',
   auth: false
 })
 
@@ -43,7 +44,7 @@ function closeAlert() {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center mx-auto p-4">
+  <div class="flex flex-col items-center justify-center mx-auto h-screen">
     <UPageCard class="w-full max-w-md">
       <UAuthForm
         :schema="schema"

@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useArticulosStore } from '~/stores/UseArticulosStores'
+// import { ref, onMounted } from 'vue'
+//  import { useArticulosStore } from '~/stores/UseArticulosStores'
 
-const props = defineProps<{ id: number }>()
-const articulosStore = useArticulosStore()
-const loading = ref(true)
-const articulo = ref<Partial<ArticulosApiN> | null>(null)
+// const props = defineProps<{ id: number }>()
+// const articulosStore = useArticulosStore()
+// const loading = ref(true)
+// const articulo = ref<Partial<ArticulosApiN> | null>(null)
 
-onMounted(async () => {
-  articulo.value = await articulosStore.fetchArticuloGroupById(String(props.id))
-  loading.value = false
-})
+// onMounted(async () => {
+//   articulo.value = await articulosStore.fetchArticuloGroupById(String(props.id))
+//   loading.value = false
+// })
 </script>
 
 <template>
-  <UCard
+  <!-- <UCard
     v-if="!loading"
     :ui="{
       base: 'overflow-hidden transition-all duration-300 hover:shadow-xl',
@@ -48,5 +48,5 @@ onMounted(async () => {
         Ver Detalles
       </UButton>
     </template>
-  </UCard>
+  </UCard> -->
 </template>
