@@ -46,7 +46,6 @@ export async function postData<T, B extends Record<string, any>>(
   const token = getApiToken(opts.api)
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {})
   }
 
@@ -75,7 +74,7 @@ export async function loginApi1(username: string, password: string) {
 
 export async function loginApi2(username: string, password: string) {
   const config = useRuntimeConfig()
-  return $fetch(`${config.public.apiBase2}/login`, {
+  return $fetch(`${config.public.apiBase2}/auth/login`, {
     method: 'POST',
     body: { username, password }
   })

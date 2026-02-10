@@ -25,7 +25,7 @@ export const navigationLinks = [
         },
         {
           label: 'Importador de precios',
-          to: '/importador-de-precios/'
+          to: '/import-articulo-precio/'
         }
       ]
     },
