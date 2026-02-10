@@ -22,6 +22,10 @@ export const navigationLinks = [
         {
           label: 'BOM',
           to: '/bom/'
+        },
+        {
+          label: 'Importador de precios',
+          to: '/importador-de-precios/'
         }
       ]
     },

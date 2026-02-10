@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   ],
   devServer: {
     host: '0.0.0.0', // <- debe estar así
-    port: 3000
+    port: 3008
   },
   experimental: {
     watcher: 'chokidar',
